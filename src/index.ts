@@ -14,6 +14,7 @@ import getConfig, { readConfig } from './utils/config';
 import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
 import update from './utils/updater';
+import initDashboard from './dashboard';
 
 export async function reloadConfig() {
   config = await readConfig();
@@ -30,6 +31,7 @@ export const version = JSON.parse(
 ).version;
 export let config = getConfig();
 export const hypixelClient = createClient(config.apiKey);
+export const dashboard = initDashboard();
 
 console.log(`\n   _____       _               _____ _        _       
   / ____|     | |             / ____| |      | |      

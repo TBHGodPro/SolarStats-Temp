@@ -13,9 +13,4 @@ run('npx', ['tsc']);
 console.log('info: obfuscating stats module 🔒');
 run('node', ['./scripts/obfuscation.js']);
 
-console.log('info: packaging app 📦\n');
-run('pkg', ['.', '--compress=GZip']);
-
-console.log(
-  '\ninfo: build successful! 🎉\n -> Run the app using `npm start`\n -> For production, use the executable inside the `dist` folder\n'
-);
+console.log('\ninfo: build successful! 🎉\n -> Run the app using `npm start`');

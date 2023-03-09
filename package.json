@@ -39,12 +39,14 @@
     "nodemon": "^2.0.19",
     "prismarine-proxy": "^1.1.1",
     "systray": "^1.0.5",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "ws": "^8.12.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.5",
     "@types/node-fetch": "^2.6.2",
     "@types/uuid": "^8.3.4",
+    "@types/ws": "^8.5.4",
     "javascript-obfuscator": "^4.0.0",
     "pkg": "^5.5.2",
     "typed-emitter": "^1.4.0",
