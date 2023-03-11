@@ -53,15 +53,16 @@ export class DashboardManager {
       httpServer.listen(config.dashboard.port);
 
       if (config.dashboard.enabled)
-        exec(
-          `export SOLARSTATS_PORT=${config.dashboard.port};npx electron "${join(
-            process.cwd(),
-            'dashboard/dist/bundled'
-          )}"`,
-          (err, out) => {
-            if (err) logger.error('[Dashboard Error]', err);
-          }
-        );
+        setTimeout(() => {
+          if (this.socket) this.emit('focus', null);
+          else
+            exec(
+              `npx electron "${join(process.cwd(), 'dashboard/dist/bundled')}"`,
+              (err, out) => {
+                if (err) logger.error('[Dashboard Error]', err);
+              }
+            );
+        }, 2500);
     })();
   }
 

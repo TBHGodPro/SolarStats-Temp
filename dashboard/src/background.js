@@ -2,6 +2,8 @@
 
 require('@electron/remote/main').initialize();
 import { app, BrowserWindow, protocol } from 'electron';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 
 const isDevelopment = !!process.env.WEBPACK_DEV_SERVER_URL;
@@ -11,7 +13,15 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-let PORT = process.env.SOLARSTATS_PORT;
+let PORT;
+
+try {
+  PORT = JSON.parse(
+    isDevelopment
+      ? readFileSync(join(process.cwd(), '../config.json'), 'utf-8')
+      : readFileSync(join(process.cwd(), 'config.json'), 'utf-8')
+  ).dashboard.port;
+} catch {}
 
 if (!PORT) PORT = 7777;
 
@@ -36,7 +46,7 @@ async function createWindow() {
       webSecurity: false,
     },
   });
-  
+
   require('@electron/remote/main').enable(win.webContents);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -53,7 +63,6 @@ async function createWindow() {
   win.webContents.on('did-finish-load', () =>
     win.webContents.send('PORT', PORT)
   );
-
 }
 
 // Quit when all windows are closed.
