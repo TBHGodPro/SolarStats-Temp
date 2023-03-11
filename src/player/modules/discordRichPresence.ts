@@ -60,25 +60,30 @@ export async function updateActivity() {
   if (JSON.stringify(activity) == JSON.stringify(info)) return;
   activity = info;
 
-  await discordClient.setActivity(info).catch((error) => logger.error(error));
+  await discordClient.setActivity(info).catch((err) => logger.error(err));
 }
 
-export function enableActivity() {
+export async function enableActivity() {
   activity = {};
-  updateActivity();
+  await updateActivity();
 }
-export function disableActivity() {
-  discordClient.clearActivity();
+export async function disableActivity() {
+  await discordClient.clearActivity().catch((err) => logger.error(err));
   activity = null;
 }
 
-discordClient.login({ clientId }).then((client) => {
-  if (client) {
-    logger.info(`Authed for user ${client.user.username}`);
-    if (playerModule.enabled) enableActivity();
-    else disableActivity();
-  } else logger.error('Failed to login to Discord RPC');
-});
+discordClient
+  .login({ clientId })
+  .then((client) => {
+    if (client) {
+      logger.info(`Authed for user ${client.user.username}`);
+      if (playerModule.enabled) enableActivity();
+      else disableActivity();
+    } else logger.error('Failed to login to Discord RPC');
+  })
+  .catch((err) =>
+    logger.error('An error occured while logging in to Discord RPC', err)
+  );
 
 playerModule.onConfigChange = async (enabled) => {
   if (enabled) enableActivity();
