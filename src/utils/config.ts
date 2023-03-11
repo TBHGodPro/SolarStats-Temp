@@ -1,13 +1,14 @@
 import { validate } from 'jsonschema';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
+import { reloadConfig } from '..';
 import Logger from '../Classes/Logger';
 import { Config } from '../Types';
 
 const customConfigPath = process.argv
   .find((arg) => arg.startsWith('--config='))
   ?.split('=')[1];
-const filePath = customConfigPath || './config.json';
+export const filePath = customConfigPath || './config.json';
 
 export function getConfig(): Config {
   const exists = existsSync(filePath);
@@ -19,7 +20,11 @@ export function getConfig(): Config {
     writeFileSync(filePath, JSON.stringify(defaultConfig, null, 2));
   }
 
-  return readConfigSync();
+  const data = readConfigSync();
+
+  reloadConfig?.(data);
+
+  return data;
 }
 
 export async function getConfigAsync(): Promise<Config> {
@@ -32,13 +37,18 @@ export async function getConfigAsync(): Promise<Config> {
     await writeFile(filePath, JSON.stringify(defaultConfig, null, 2));
   }
 
-  return await readConfig();
+  const data = await readConfig();
+
+  reloadConfig?.(data);
+
+  return data;
 }
 
 export async function setValue(key: string, value: unknown): Promise<void> {
   const config = JSON.parse(await readFile(filePath, 'utf8'));
   config[key] = value;
   await writeFile(filePath, JSON.stringify(config, null, 2));
+  reloadConfig?.(config, false);
 }
 
 export async function readConfig(): Promise<Config> {

@@ -1,6 +1,6 @@
 import {
-    LunarClientPlayer,
-    NotificationLevel
+  LunarClientPlayer,
+  NotificationLevel
 } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client } from 'minecraft-protocol';
@@ -11,6 +11,7 @@ import Command from '../Classes/Command';
 import CommandHandler from '../Classes/CommandHandler';
 import Listener from '../Classes/Listener';
 import Logger from '../Classes/Logger';
+import { updateDashboardPlayer, updateMeta } from '../dashboard';
 import { IPlayer, Team } from '../Types';
 import { fetchPlayerLocation } from '../utils/hypixel';
 import loadPlugins, { PluginInfo } from '../utils/plugins';
@@ -144,6 +145,8 @@ export default class Player {
     setTimeout(async () => {
       await this.refreshPlayerLocation();
     }, 1500);
+
+    updateDashboardPlayer();
   }
 
   public disconnect(): void {
@@ -158,6 +161,8 @@ export default class Player {
     this.listener.removeAllListeners();
 
     this.modules.forEach((module) => module.onDisconnect());
+
+    updateDashboardPlayer();
   }
 
   public async refreshPlayerLocation(): Promise<void> {
@@ -177,6 +182,8 @@ export default class Player {
       .catch(() => {
         this.status = null;
       });
+
+    updateDashboardPlayer();
   }
 
   public async dodge(): Promise<void> {
@@ -226,5 +233,7 @@ export default class Player {
     this.modules.splice(this.modules.indexOf(module), 1);
     Logger.error(`Error while executing module ${module.name}!`, error);
     this.crashedModules.push(module);
+
+    updateMeta();
   }
 }

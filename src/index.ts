@@ -1,24 +1,22 @@
 import axios from 'axios';
 import * as chalk from 'chalk';
 import { ping } from 'minecraft-protocol';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import * as https from 'node:https';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
 import Listener from './Classes/Listener';
 import Logger from './Classes/Logger';
-import initDashboard from './dashboard';
+import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
 import PlayerModule from './player/PlayerModule';
-import { getConfig, getConfigAsync } from './utils/config';
+import { Config } from './Types';
+import { filePath, getConfig } from './utils/config';
 import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
 import update from './utils/updater';
 
-export async function reloadConfig() {
-  config = await getConfigAsync();
-}
 export const isPacked: boolean = Object.prototype.hasOwnProperty.call(
   process,
   'pkg'
@@ -38,6 +36,20 @@ if (
   throw 'Please put in a valid Hypixel API Key into the config.json file';
 export const hypixelClient = createClient(config.apiKey);
 export const dashboard = initDashboard();
+
+export function reloadConfig(data: Config, log = true) {
+  if (JSON.stringify(config) == JSON.stringify(data)) return;
+  config = data;
+  if (log) {
+    Logger.info('Config Reloaded');
+    dashboard.emit('notification', {
+      title: 'Reloaded Config!',
+      message: '',
+      type: 'info',
+    });
+  }
+  updateConfig();
+}
 
 console.log(`\n   _____       _               _____ _        _       
   / ____|     | |             / ____| |      | |      
@@ -90,18 +102,22 @@ Logger.info('Proxy started');
 
 export const listener = new Listener(proxy);
 
-const modules: PlayerModule[] = [];
+export const modules: PlayerModule[] = [];
 readdirSync(join(__dirname, 'player', 'modules')).forEach((file) => {
   try {
     if (!file.endsWith('.js')) return;
     const module = require(join(__dirname, 'player', 'modules', file)).default;
 
-    if (module instanceof PlayerModule) modules.push(module);
-    else Logger.warn(`Module in file ${file} is not a valid module.`);
+    if (module instanceof PlayerModule) {
+      config.modules[module.configKey] ??= module.enabled || false;
+      modules.push(module);
+    } else Logger.warn(`Module in file ${file} is not a valid module.`);
   } catch (error) {
     Logger.error(`Couldn't load module ${file}`, error);
   }
 });
+
+writeFileSync(filePath, JSON.stringify(config, null, 2));
 
 export const player = new Player(listener, proxy, modules);
 

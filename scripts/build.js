@@ -1,6 +1,6 @@
 const { execSync } = require('child_process');
 
-function run(executable, params) {
+function run(executable, params = []) {
   execSync(`${executable} ${params.join(' ')}`, {
     shell: true,
     stdio: 'inherit',
@@ -12,5 +12,8 @@ run('npx', ['tsc']);
 
 console.log('info: obfuscating stats module 🔒');
 run('node', ['./scripts/obfuscation.js']);
+
+console.log('info: building dashboard 🌐');
+run('cd dashboard && npm run build');
 
 console.log('\ninfo: build successful! 🎉\n -> Run the app using `npm start`');

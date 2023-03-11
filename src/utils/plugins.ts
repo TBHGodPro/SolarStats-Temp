@@ -9,6 +9,7 @@ import Command from '../Classes/Command';
 import Inventory from '../Classes/Inventory';
 import Item from '../Classes/Item';
 import Logger from '../Classes/Logger';
+import { updateMeta } from '../dashboard';
 import Player from '../player/Player';
 import PlayerModule from '../player/PlayerModule';
 import { InventoryType } from '../Types';
@@ -35,6 +36,7 @@ export default async function loadPlugins(player: Player): Promise<void> {
       if (loadedPlugin) {
         player.plugins.push(loadedPlugin);
       }
+      updateMeta();
     } catch (error) {
       Logger.error(`Error while loading plugin ${file}`, error);
     }

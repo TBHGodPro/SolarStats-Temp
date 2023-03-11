@@ -1,10 +1,11 @@
-import { config, reloadConfig } from '..';
+import { config } from '..';
 import Command from '../Classes/Command';
 import Inventory from '../Classes/Inventory';
 import Item from '../Classes/Item';
 import Logger from '../Classes/Logger';
+import { updateMeta } from '../dashboard';
 import { InventoryType, WindowClickEvent } from '../Types';
-import { setValue } from '../utils/config';
+import { getConfigAsync, setValue } from '../utils/config';
 
 const command = new Command(
   'solarstats',
@@ -23,7 +24,7 @@ command.onTriggered = async (chatCommand, args) => {
 
   const action = command.getStringArgument(args, 0, true);
   if (action === 'reload') {
-    await reloadConfig();
+    await getConfigAsync();
     player.sendMessage('§aSolar Stats config successfully reloaded!');
     return;
   }
@@ -87,7 +88,7 @@ command.onTriggered = async (chatCommand, args) => {
       const newConfig = { ...config.modules };
       newConfig[module.configKey] = !config.modules[module.configKey];
       await setValue('modules', newConfig);
-      await reloadConfig();
+      await getConfigAsync();
       module.settingItem.lore[
         module.settingItem.lore.indexOf(
           module.settingItem.lore.find((i) => i.includes('§7Current: '))
@@ -98,6 +99,7 @@ command.onTriggered = async (chatCommand, args) => {
       inventory.setSlot(player.client, module.settingItem, slot);
       module.onConfigChange(config.modules[module.configKey]);
       module.toggleEnabled(config.modules[module.configKey]);
+      updateMeta();
     };
   }
 

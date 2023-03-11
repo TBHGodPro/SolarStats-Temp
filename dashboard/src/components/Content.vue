@@ -13,11 +13,13 @@
 
 <script>
 import Home from './tabs/Home.vue';
+import Modules from './tabs/Modules.vue';
 
 export default {
   name: 'Content',
   components: {
     Home,
+    Modules,
   },
 };
 </script>

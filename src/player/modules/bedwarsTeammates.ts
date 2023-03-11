@@ -82,15 +82,15 @@ playerModule.customCode = () => {
 
         player.lcPlayer.addTeammate({
           uuid:
-            uuid.substr(0, 8) +
+            uuid.substring(0, 8) +
             '-' +
-            uuid.substr(8, 4) +
+            uuid.substring(8, 4) +
             '-' +
-            uuid.substr(12, 4) +
+            uuid.substring(12, 4) +
             '-' +
-            uuid.substr(16, 4) +
+            uuid.substring(16, 4) +
             '-' +
-            uuid.substr(20),
+            uuid.substring(20),
         });
       });
       // await this.sendTeammates();

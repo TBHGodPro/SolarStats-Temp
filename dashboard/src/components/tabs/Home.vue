@@ -1,6 +1,6 @@
 <template>
   <div id="home-grid">
-    <div class="home-grid-row">
+    <div class="home-grid-row row-2">
       <div class="box box-3">
         <h1>Info</h1>
         <h3>
@@ -20,23 +20,140 @@
             "
           ></i>
         </h3>
-        <h2>
-          {{ Object.keys($store.state.data.config.modules).length }}
-          <small style="font-weight: 600">Modules</small>
-        </h2>
-        <h2>
-          {{ Object.keys($store.state.data.plugins).length }}
-          <small style="font-weight: 600">Plugins</small>
-        </h2>
-        <h2>
-          {{ Object.keys($store.state.data.config.customEmotes).length }}
-          <small style="font-weight: 600">Custom Emotes</small>
+        <h2 id="info-modules-plugins-cEmotes">
+          <span
+            @mouseenter="
+              $store.state.data.modules.length
+                ? showTooltip(
+                    $store.state.data.modules
+                      .map((i) =>
+                        i.enabled
+                          ? `<span style=\'color: var(--color-green);\'>${i.name}</span>`
+                          : `<span style=\'color: var(--color-red);\'>${i.name}</span>`
+                      )
+                      .join(', ')
+                  )
+                : ''
+            "
+            @mousemove="moveTooltip"
+            @mouseleave="hideTooltip"
+            @click="setActiveTab('Modules')"
+            >{{ Object.keys($store.state.data.config.modules).length }}
+            <small style="font-weight: 600"
+              >Module{{
+                Object.keys($store.state.data.config.modules).length == 1
+                  ? ''
+                  : 's'
+              }}</small
+            ></span
+          >
+          •
+          <span
+            v-if="$store.state.data.crashedModules.length"
+            style="color: var(--color-red-hover)"
+            @mouseenter="
+              $store.state.data.crashedModules.length
+                ? showTooltip(
+                    $store.state.data.crashedModules
+                      .map((i) => i.name)
+                      .join(', ')
+                  )
+                : ''
+            "
+            @mousemove="moveTooltip"
+            @mouseleave="hideTooltip"
+          >
+            {{ $store.state.data.crashedModules.length }}
+            <small style="font-weight: 600; color: var(--color-red-hover)"
+              >Crashed Modules</small
+            >
+            <span> •</span></span
+          >
+          <span
+            @mouseenter="
+              $store.state.data.plugins.length
+                ? showTooltip(
+                    $store.state.data.plugins.map((i) => i.name).join(', ')
+                  )
+                : ''
+            "
+            @mousemove="moveTooltip"
+            @mouseleave="hideTooltip"
+          >
+            {{ $store.state.data.plugins.length }}
+            <small style="font-weight: 600"
+              >Plugin{{
+                $store.state.data.plugins.length == 1 ? '' : 's'
+              }}</small
+            ></span
+          >
+          •
+          <span
+            @mouseenter="
+              Object.keys($store.state.data.config.customEmotes).length
+                ? showTooltip(
+                    Object.keys($store.state.data.config.customEmotes)
+                      .map(
+                        (i) =>
+                          `${i} = ${$store.state.data.config.customEmotes[i]}`
+                      )
+                      .join('<br/>')
+                  )
+                : ''
+            "
+            @mousemove="moveTooltip"
+            @mouseleave="hideTooltip"
+          >
+            {{ Object.keys($store.state.data.config.customEmotes).length }}
+            <small style="font-weight: 600"
+              >Custom Emote{{
+                Object.keys($store.state.data.config.customEmotes).length == 1
+                  ? ''
+                  : 's'
+              }}</small
+            ></span
+          >
         </h2>
       </div>
       <div class="box box-1">
         <h1>Uptime</h1>
         <h2>{{ uptime }}</h2>
       </div>
+    </div>
+    <div class="home-grid-row row-1" v-if="$store.state.data.player">
+      <div class="box box-3">
+        <h1>Connected Player</h1>
+        <h2>
+          {{ $store.state.data.player.username }}
+        </h2>
+        <h5>{{ $store.state.data.player.uuid }}</h5>
+        <h4 v-if="$store.state.data.player.status">
+          {{
+            [
+              $store.state.data.player?.status?.game?.name,
+              $store.state.data.player?.status?.mode
+                ? $store.state.data.player.status.mode
+                    .split('_')
+                    .map(
+                      (i) => i[0].toUpperCase() + i.substring(1).toLowerCase()
+                    )
+                    .join(' ')
+                : null,
+              $store.state.data.player?.status?.map,
+            ]
+              .filter((i) => i)
+              .join(' • ')
+          }}
+        </h4>
+      </div>
+    </div>
+    <div
+      ref="tooltip"
+      v-show="tooltip.show"
+      :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }"
+      class="tooltip"
+    >
+      <h3 v-html="tooltip.value"></h3>
     </div>
   </div>
 </template>
@@ -48,6 +165,12 @@ export default {
   name: 'Home',
   data: () => ({
     uptime: null,
+    tooltip: {
+      show: false,
+      x: 0,
+      y: 0,
+      value: '',
+    },
   }),
   methods: {
     secondsToHms(d) {
@@ -62,6 +185,22 @@ export default {
     },
     copyToClipboard(data) {
       clipboard.writeText(data, 'clipboard');
+    },
+
+    showTooltip(value) {
+      this.tooltip.value = value;
+      this.tooltip.show = true;
+    },
+    moveTooltip(event) {
+      this.tooltip.x = event.clientX + 20;
+      this.tooltip.y = event.clientY - 40;
+    },
+    hideTooltip() {
+      this.tooltip.show = false;
+    },
+
+    setActiveTab(tab) {
+      this.$store.state.activeTab = tab;
     },
   },
   created() {
@@ -91,8 +230,16 @@ export default {
 .home-grid-row {
   display: flex;
   flex-direction: column;
-  flex: 1;
   margin: 0px 10px;
+}
+.row-1 {
+  flex: 1;
+}
+.row-2 {
+  flex: 2;
+}
+.row-3 {
+  flex: 3;
 }
 
 .box {
@@ -101,7 +248,6 @@ export default {
   background-color: var(--color-lightest-bg);
   margin: 10px 0px;
 }
-
 .box-1 {
   flex: 1;
 }
@@ -119,5 +265,9 @@ export default {
 .copy-button:hover {
   cursor: pointer;
   color: var(--color-dark-font);
+}
+
+#info-modules-plugins-cEmotes:hover {
+  cursor: pointer;
 }
 </style>

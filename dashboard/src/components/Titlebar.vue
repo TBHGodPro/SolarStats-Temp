@@ -8,8 +8,60 @@
       ></i>
       <i class="fa-solid fa-x mini-button x-button" @click="hideWindow()"></i>
     </div>
+    <div id="tabs">
+      <button
+        class="tab"
+        v-bind:class="{
+          'tab-selected': $store.state.activeTab == tab,
+        }"
+        @click="setActiveTab(tab)"
+        v-for="tab in tabs"
+        v-bind:key="tab"
+      >
+        {{ tab.toUpperCase() }}
+      </button>
+    </div>
     <div id="actions">
-      <button class="action" @click="killProcess()"></button>
+      <button
+        class="action fa-solid fa-arrow-rotate-left"
+        @click="reloadConfig()"
+        style="
+          color: rgb(59, 161, 219);
+          background-color: rgba(59, 161, 219, 0.2);
+        "
+        @mouseenter="
+          showTooltip(
+            'Reload Config',
+            'Checks and Reloads if the Config File has been Updated'
+          )
+        "
+        @mousemove="moveTooltip"
+        @mouseleave="hideTooltip"
+      ></button>
+      <button
+        class="action fa-solid fa-skull"
+        @click="killProcess()"
+        style="
+          color: rgb(219, 59, 104);
+          background-color: rgba(219, 59, 104, 0.2);
+        "
+        @mouseenter="showTooltip('Kill', 'Kill the SolarStats Process')"
+        @mousemove="moveTooltip"
+        @mouseleave="hideTooltip"
+      ></button>
+    </div>
+    <div
+      ref="tooltip"
+      v-show="tooltip.show"
+      :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }"
+      class="tooltip"
+    >
+      <h3>
+        {{ tooltip.name }}
+      </h3>
+      <p>
+        {{ tooltip.description }}
+      </p>
     </div>
   </div>
 </template>
@@ -20,6 +72,16 @@ import { showNotification } from '../store';
 
 export default {
   name: 'TitleBar',
+  data: () => ({
+    tooltip: {
+      show: false,
+      x: 0,
+      y: 0,
+      name: '',
+      description: '',
+    },
+    tabs: ['Home', 'Modules'],
+  }),
   methods: {
     minimizeWindow() {
       const window = getCurrentWindow();
@@ -41,6 +103,28 @@ export default {
         'Successfully killed the process',
         'success'
       );
+    },
+    reloadConfig() {
+      this.$store.dispatch('sendMessage', {
+        op: 'reloadConfig',
+        dontSave: true,
+      });
+    },
+
+    showTooltip(name, description) {
+      this.tooltip.name = name;
+      this.tooltip.description = description;
+      this.tooltip.show = true;
+    },
+    moveTooltip(event) {
+      this.tooltip.x = event.clientX + 20;
+      this.tooltip.y = event.clientY - 40;
+    },
+    hideTooltip() {
+      this.tooltip.show = false;
+    },
+    setActiveTab(tab) {
+      this.$store.state.activeTab = tab;
     },
   },
 };
@@ -89,5 +173,57 @@ export default {
 
 #actions {
   -webkit-app-region: none;
+  position: absolute;
+  right: 300px;
+  top: 10px;
+  display: flex;
+}
+.action {
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 50px;
+  border-radius: 0.35rem;
+  outline: none;
+  border: none;
+  margin: 5px;
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
+  font-size: 1.6rem;
+}
+.action:hover {
+  filter: brightness(1.2);
+}
+
+#tabs {
+  -webkit-app-region: none;
+  position: absolute;
+  left: 125px;
+  top: 10px;
+  display: flex;
+}
+.tab {
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0px 20px;
+  border-radius: 10px;
+  outline: none;
+  border: none;
+  margin: 5px;
+  cursor: pointer;
+  transition: filter 0.3s ease-in-out;
+  font-size: 1.6rem;
+  background-color: var(--color-light-bg);
+}
+.tab:hover {
+  filter: brightness(1.25);
+}
+.tab-selected {
+  filter: brightness(1.5);
+}
+.tab-selected:hover {
+  filter: brightness(1.5);
+  cursor: default;
 }
 </style>

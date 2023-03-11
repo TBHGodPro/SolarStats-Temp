@@ -76,15 +76,15 @@ const onIncomingPacket = async (
     if (!response) return;
 
     const addDashes = (i) =>
-      i.substr(0, 8) +
+      i.substring(0, 8) +
       '-' +
-      i.substr(8, 4) +
+      i.substring(8, 4) +
       '-' +
-      i.substr(12, 4) +
+      i.substring(12, 4) +
       '-' +
-      i.substr(16, 4) +
+      i.substring(16, 4) +
       '-' +
-      i.substr(20);
+      i.substring(20);
     playerModule.player.lcPlayer.addTeammate({
       uuid: addDashes(response.data.id),
     });

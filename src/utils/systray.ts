@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import SysTray, { MenuItem } from 'systray';
-import { config, dashboard, reloadConfig } from '..';
-import Logger from '../Classes/Logger';
+import { config, dashboard } from '..';
+import { getConfigAsync } from './config';
 
 export default function setupTray(): SysTray {
   if (process.argv.includes('--noTray')) return null;
@@ -48,8 +48,7 @@ export default function setupTray(): SysTray {
         dashboard.emit('focus', null);
         break;
       case 1:
-        await reloadConfig();
-        Logger.info('Config Reloaded');
+        await getConfigAsync();
         break;
       case 2:
         systray.kill();

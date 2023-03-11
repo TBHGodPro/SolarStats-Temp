@@ -13,6 +13,7 @@
   --color-darker-gray: #222222;
   --color-dark-gray: #303030;
   --color-gray: #595959;
+  --color-slightly-light-gray: #696969;
   --color-light-gray: #cdcdcd;
   --color-gray-outline: #87878740;
   --color-ultra-blue: #0f94f3;
@@ -38,9 +39,12 @@
   --color-orange-outline: #e6913d40;
   --color-footer-text: #4e4e4e;
 
-  --color-notif-info: #3b96ce;
+  --color-notif-info: #3b96d5;
   --color-notif-success: #3bbe6b;
   --color-notif-fail: #b5443b;
+
+  --text-shadow: 0px 2px 0px rgb(0 0 0 / 20%);
+  --short-text-shadow: 0px 1px 0px rgb(0 0 0 / 20%);
 }
 
 * {

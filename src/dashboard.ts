@@ -1,11 +1,14 @@
+import { Game } from 'hypixel-api-reborn';
 import { exec } from 'node:child_process';
 import { createServer, IncomingMessage } from 'node:http';
 import { join } from 'node:path';
 import { WebSocket, WebSocketServer } from 'ws';
+import { config, dashboard, modules, player } from '.';
 import Logger from './Classes/Logger';
+import { updateActivity } from './player/modules/discordRichPresence';
 import { Config } from './Types';
-import { getConfigAsync } from './utils/config';
-import { getPlugins } from './utils/plugins';
+import { getConfigAsync, setValue } from './utils/config';
+import { PluginInfo } from './utils/plugins';
 
 const logger = new Logger('Dashboard');
 
@@ -49,7 +52,7 @@ export class DashboardManager {
 
       httpServer.listen(config.dashboard.port);
 
-      if (config.dashboard.enabled && false)
+      if (config.dashboard.enabled)
         exec(
           `export SOLARSTATS_PORT=${config.dashboard.port};npx electron "${join(
             process.cwd(),
@@ -68,7 +71,7 @@ export class DashboardManager {
 
     this.socket.on('error', (err) => logger.error('[WebSocket Error]', err));
     this.socket.on('close', () => (this.socket = null));
-    this.socket.on('message', (raw) => {
+    this.socket.on('message', async (raw) => {
       let msg: {
         op: keyof IncomingDashboardEvents;
         data: any;
@@ -85,13 +88,37 @@ export class DashboardManager {
           this.socket.close();
           process.exit(0);
           break;
+        case 'reloadConfig':
+          await getConfigAsync();
+          break;
+        case 'toggleModule':
+          if (player.modules.find((i) => i.name == data.name)) {
+            const module = player.modules.find((i) => i.name == data.name);
+            const newConfig = { ...config.modules };
+            newConfig[module.configKey] = data.enabled;
+            await setValue('modules', newConfig);
+            module.onConfigChange(data.enabled);
+            module.toggleEnabled(data.enabled);
+          }
+          break;
       }
     });
 
     this.emit('metadata', {
       startedAt: Date.now() - Math.floor(process.uptime() * 1000),
       config: await getConfigAsync(),
-      plugins: (await getPlugins()).map((p) => p.replace(/\.js/g, '')),
+      plugins: player.plugins,
+      modules: modules.map((m) => ({
+        name: m.name,
+        description: m.description,
+        enabled: m.enabled,
+      })),
+      crashedModules: player.crashedModules.map((m) => ({
+        name: m.name,
+        description: m.description,
+        enabled: m.enabled,
+      })),
+      player: getDashboardPlayer(),
     });
   }
 
@@ -115,11 +142,110 @@ export type OutgoingDashboardEvents = {
   metadata: {
     startedAt: number;
     config: Config;
-    plugins: string[];
+    modules: DashboardModule[];
+    crashedModules: DashboardModule[];
+    plugins: DashboardPlugin[];
+    player?: DashboardPlayer;
+  };
+  notification: {
+    title: string;
+    message: string;
+    type: 'info' | 'success' | 'fail';
+    duration?: number;
   };
   focus: null;
+
+  updateConfig: Config;
+  updateModules: {
+    modules: DashboardModule[];
+    crashedModules: DashboardModule[];
+  };
+  updatePlugins: DashboardPlugin[];
+  updatePlayer: DashboardPlayer;
 };
 
 export type IncomingDashboardEvents = {
   kill: null;
+  reloadConfig: null;
+  toggleModule: {
+    name: string;
+    enabled: boolean;
+  };
 };
+
+// Intervals
+
+setInterval(() => updateDashboardPlayer(), 500);
+
+// Utilities
+
+export async function updateAll() {
+  await updateConfig();
+  updateMeta();
+  updateDashboardPlayer();
+}
+
+export async function updateConfig() {
+  dashboard.emit('updateConfig', await getConfigAsync());
+}
+
+export function updateMeta() {
+  dashboard.emit('updateModules', {
+    modules: modules.map((m) => ({
+      name: m.name,
+      description: m.description,
+      enabled: m.enabled,
+    })),
+    crashedModules: player.crashedModules.map((m) => ({
+      name: m.name,
+      description: m.description,
+      enabled: m.enabled,
+    })),
+  });
+  dashboard.emit('updatePlugins', player.plugins);
+}
+
+export function updateDashboardPlayer() {
+  dashboard.emit('updatePlayer', getDashboardPlayer());
+  updateActivity();
+}
+
+// Data Getters
+
+export function getDashboardPlayer() {
+  return player?.online
+    ? {
+        username: player.client.username,
+        uuid: player.uuid,
+        status: player.status
+          ? {
+              online: player.status.online,
+              game: player.status.game,
+              mode: player.status.mode,
+              map: player.status.map,
+            }
+          : null,
+      }
+    : null;
+}
+
+// Data Types
+
+export interface DashboardPlayer {
+  username: string;
+  uuid: string;
+  status: {
+    online: boolean;
+    game?: Game;
+    mode?: string;
+    map?: string;
+  };
+}
+
+export interface DashboardModule {
+  name: string;
+  description: string;
+  enabled: boolean;
+}
+
+export type DashboardPlugin = PluginInfo;

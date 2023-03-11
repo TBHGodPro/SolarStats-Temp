@@ -37,7 +37,7 @@ export default class PlayerModule {
     this.description = description;
 
     if (configKey) {
-      this.enabled = !!readConfigSync().modules[configKey];
+      this.enabled = readConfigSync().modules[configKey];
     } else {
       this.enabled = true;
     }
