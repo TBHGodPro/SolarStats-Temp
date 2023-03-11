@@ -1,7 +1,7 @@
 import { Status } from 'hypixel-api-reborn';
 import Item from '../Classes/Item';
 import { ListenerEvents } from '../Types';
-import { readConfigSync } from '../utils/config';
+import { getConfig, readConfigSync } from '../utils/config';
 import Player from './Player';
 
 enum Events {
@@ -37,7 +37,7 @@ export default class PlayerModule {
     this.description = description;
 
     if (configKey) {
-      this.enabled = readConfigSync().modules[configKey];
+      this.enabled = getConfig().modules[configKey];
     } else {
       this.enabled = true;
     }
