@@ -7,6 +7,7 @@
   --color-dark-bg: rgb(11, 20, 41);
 
   --color-font: rgb(240, 240, 240);
+  --color-dark-font: rgb(200, 200, 200);
 
   --color-darkest-gray: #151515;
   --color-darker-gray: #222222;
@@ -36,6 +37,10 @@
   --color-orange-very-dark: #c26c16;
   --color-orange-outline: #e6913d40;
   --color-footer-text: #4e4e4e;
+
+  --color-notif-info: #3b96ce;
+  --color-notif-success: #3bbe6b;
+  --color-notif-fail: #b5443b;
 }
 
 * {

@@ -49,7 +49,7 @@ export class DashboardManager {
 
       httpServer.listen(config.dashboard.port);
 
-      if (config.dashboard.enabled)
+      if (config.dashboard.enabled && false)
         exec(
           `export SOLARSTATS_PORT=${config.dashboard.port};npx electron "${join(
             process.cwd(),
@@ -68,6 +68,25 @@ export class DashboardManager {
 
     this.socket.on('error', (err) => logger.error('[WebSocket Error]', err));
     this.socket.on('close', () => (this.socket = null));
+    this.socket.on('message', (raw) => {
+      let msg: {
+        op: keyof IncomingDashboardEvents;
+        data: any;
+      };
+      try {
+        msg = JSON.parse(raw as unknown as string);
+      } catch (err) {
+        logger.error('Error Parsing Dashboard WS Message', raw, err);
+      }
+      const data = msg.data;
+
+      switch (msg.op) {
+        case 'kill':
+          this.socket.close();
+          process.exit(0);
+          break;
+      }
+    });
 
     this.emit('metadata', {
       startedAt: Date.now() - Math.floor(process.uptime() * 1000),
@@ -76,9 +95,9 @@ export class DashboardManager {
     });
   }
 
-  public emit<T extends keyof DashboardEvents>(
+  public emit<T extends keyof OutgoingDashboardEvents>(
     op: T,
-    data: DashboardEvents[T]
+    data: OutgoingDashboardEvents[T]
   ): Promise<void> {
     return new Promise((res, rej) => {
       this.socket?.send(
@@ -92,11 +111,15 @@ export class DashboardManager {
   }
 }
 
-export type DashboardEvents = {
+export type OutgoingDashboardEvents = {
   metadata: {
     startedAt: number;
     config: Config;
     plugins: string[];
   };
   focus: null;
+};
+
+export type IncomingDashboardEvents = {
+  kill: null;
 };

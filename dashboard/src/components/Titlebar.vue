@@ -8,11 +8,15 @@
       ></i>
       <i class="fa-solid fa-x mini-button x-button" @click="hideWindow()"></i>
     </div>
+    <div id="actions">
+      <button class="action" @click="killProcess()"></button>
+    </div>
   </div>
 </template>
 
 <script>
 import { getCurrentWindow } from '@electron/remote';
+import { showNotification } from '../store';
 
 export default {
   name: 'TitleBar',
@@ -24,6 +28,19 @@ export default {
     },
     hideWindow() {
       getCurrentWindow().hide();
+    },
+
+    killProcess() {
+      this.$store.dispatch('sendMessage', {
+        op: 'kill',
+        dontSave: true,
+      });
+      this.$store.state.ws?.close();
+      showNotification(
+        'Success!',
+        'Successfully killed the process',
+        'success'
+      );
     },
   },
 };
@@ -68,5 +85,9 @@ export default {
 .minus-button:hover {
   background-color: var(--color-yellow);
   color: var(--color-lightest-bg);
+}
+
+#actions {
+  -webkit-app-region: none;
 }
 </style>

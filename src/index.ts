@@ -65,7 +65,7 @@ const proxy = new InstantConnectProxy({
   serverOptions: {
     version: '1.8.9',
     motd: '§cSolar Stats Proxy',
-    port: 25556,
+    port: config.proxyPort,
     beforePing: async (response, client, callback) => {
       response = await ping({
         host: config.server.host,

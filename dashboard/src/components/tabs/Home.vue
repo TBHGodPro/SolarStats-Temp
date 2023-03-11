@@ -3,8 +3,23 @@
     <div class="home-grid-row">
       <div class="box box-3">
         <h1>Info</h1>
-        <h3>Server: {{ $store.state.data.config.server.host }}</h3>
-        <h3>Proxy IP: 127.0.0.1:{{ $store.state.data.config.server.port }}</h3>
+        <h3>
+          Server: {{ $store.state.data.config.server.host
+          }}{{
+            $store.state.data.config.server.port == '25565'
+              ? ''
+              : `:${$store.state.data.config.server.port}`
+          }}
+        </h3>
+        <h3>
+          Proxy IP: 127.0.0.1:{{ $store.state.data.config.proxyPort
+          }}<i
+            class="fa-solid fa-copy copy-button"
+            @click="
+              copyToClipboard(`127.0.0.1:${$store.state.data.config.proxyPort}`)
+            "
+          ></i>
+        </h3>
         <h2>
           {{ Object.keys($store.state.data.config.modules).length }}
           <small style="font-weight: 600">Modules</small>
@@ -27,6 +42,8 @@
 </template>
 
 <script>
+import { clipboard } from '@electron/remote';
+
 export default {
   name: 'Home',
   data: () => ({
@@ -42,6 +59,9 @@ export default {
       const mDisplay = m > 0 ? m + (m == 1 ? ' m ' : ' mins ') : '';
       const sDisplay = s > 0 ? s + (s == 1 ? ' s' : ' s') : '';
       return hDisplay + mDisplay + sDisplay;
+    },
+    copyToClipboard(data) {
+      clipboard.writeText(data, 'clipboard');
     },
   },
   created() {
@@ -90,5 +110,14 @@ export default {
 }
 .box-3 {
   flex: 3;
+}
+
+.copy-button {
+  margin-left: 7.5px;
+  transition: color 0.1s ease;
+}
+.copy-button:hover {
+  cursor: pointer;
+  color: var(--color-dark-font);
 }
 </style>

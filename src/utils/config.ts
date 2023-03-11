@@ -127,6 +127,7 @@ export const defaultConfig: Config = {
     enabled: true,
     port: 7777,
   },
+  proxyPort: 25556,
   customEmotes: {},
   checkForUpdates: true,
   autoDownloadUpdates: true,

@@ -12,6 +12,7 @@ export interface Config {
     enabled: boolean;
     port: number;
   };
+  proxyPort: number;
   customEmotes: { [key: string]: string };
   checkForUpdates: boolean;
   autoDownloadUpdates: boolean;

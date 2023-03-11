@@ -36,6 +36,8 @@ async function createWindow() {
       webSecurity: false,
     },
   });
+  
+  require('@electron/remote/main').enable(win.webContents);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -52,7 +54,6 @@ async function createWindow() {
     win.webContents.send('PORT', PORT)
   );
 
-  require('@electron/remote/main').enable(win.webContents);
 }
 
 // Quit when all windows are closed.

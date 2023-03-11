@@ -9,6 +9,12 @@
     "host": "hypixel.net", // IP of the server
     "port": 25565 // Port of the server
   },
+  "dashboard": {
+    // Dashboard settings
+    "enabled": true, // Whether dashboard is enabled
+    "port": 7777 // Dashboard port, not relevant unless you have other programs running on the same port
+  },
+  "proxyPort": 25556, // Port of the Proxy
   "customEmotes": {
     ":solar:": "☀" // "syntax": "emote (syntax is the message you type in chat, and the emote is the one you see)"
   },

@@ -1,9 +1,9 @@
+import * as remote from '@electron/remote';
+import { ipcRenderer } from 'electron';
 import { createApp } from 'vue';
 import App from './App.vue';
-import store from './store';
-import { ipcRenderer } from 'electron';
-import * as remote from '@electron/remote';
 import constants from './constants';
+import store from './store';
 
 import './assets/global.css';
 
@@ -18,13 +18,19 @@ ipcRenderer.once('PORT', async (_, port) => {
       store.state.ws = new WebSocket(`ws://localhost:${port}`);
 
       store.state.ws.onopen = () => {
+        store.state.failedPackets.forEach((p) => store.state.ws.send(p));
+        store.state.failedPackets = [];
         console.log('[WebSocket] Connected!');
       };
       store.state.ws.onerror = (err) => {
-        console.error('[WebSocket]', err);
+        if (err.target?.readyState !== 3) console.error('[WebSocket]', err);
         rej(err);
       };
-      store.state.ws.onclose = () => setup();
+      store.state.ws.onclose = () => {
+        store.state.ws = null;
+        console.log('[WebSocket] Disconnected');
+        setTimeout(() => setup(), 2500);
+      };
       store.state.ws.onmessage = async ({ data: raw }) => {
         /** @type {{ op: string, data: any }} */
         let msg;
