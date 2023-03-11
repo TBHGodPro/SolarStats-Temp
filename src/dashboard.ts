@@ -113,11 +113,13 @@ export class DashboardManager {
         name: m.name,
         description: m.description,
         enabled: m.enabled,
+        createdBy: m.createdBy,
       })),
       crashedModules: player.crashedModules.map((m) => ({
         name: m.name,
         description: m.description,
         enabled: m.enabled,
+        createdBy: m.createdBy,
       })),
       player: getDashboardPlayer(),
     });
@@ -196,11 +198,13 @@ export function updateMeta() {
       name: m.name,
       description: m.description,
       enabled: m.enabled,
+      createdBy: m.createdBy,
     })),
     crashedModules: player.crashedModules.map((m) => ({
       name: m.name,
       description: m.description,
       enabled: m.enabled,
+      createdBy: m.createdBy,
     })),
   });
   dashboard.emit('updatePlugins', player.plugins);
@@ -247,6 +251,7 @@ export interface DashboardModule {
   name: string;
   description: string;
   enabled: boolean;
+  createdBy?: PluginInfo;
 }
 
 export type DashboardPlugin = PluginInfo;

@@ -1,7 +1,8 @@
 import { Status } from 'hypixel-api-reborn';
 import Item from '../Classes/Item';
 import { ListenerEvents } from '../Types';
-import { getConfig, readConfigSync } from '../utils/config';
+import { getConfig, readConfigSync, setValueSync } from '../utils/config';
+import { PluginInfo } from '../utils/plugins';
 import Player from './Player';
 
 enum Events {
@@ -27,6 +28,8 @@ export default class PlayerModule {
   public settingItem: Item;
   public configKey: string;
 
+  public createdBy?: PluginInfo;
+
   public constructor(
     name: string,
     description: string,
@@ -37,7 +40,14 @@ export default class PlayerModule {
     this.description = description;
 
     if (configKey) {
-      this.enabled = getConfig().modules[configKey];
+      const config = getConfig();
+      this.enabled = config.modules[configKey];
+      if (this.enabled === undefined) {
+        const newConfig = { ...config.modules };
+        newConfig[configKey] = false;
+        setValueSync('modules', newConfig);
+        this.toggleEnabled(false);
+      }
     } else {
       this.enabled = true;
     }

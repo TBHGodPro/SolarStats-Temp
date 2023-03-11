@@ -13,7 +13,9 @@ run('npx', ['tsc']);
 console.log('info: obfuscating stats module 🔒');
 run('node', ['./scripts/obfuscation.js']);
 
-console.log('info: building dashboard 🌐');
-run('cd dashboard && npm run build');
+if (!process.argv.includes('--noDashboard')) {
+  console.log('info: building dashboard 🌐');
+  run('cd dashboard && npm run build');
+}
 
 console.log('\ninfo: build successful! 🎉\n -> Run the app using `npm start`');

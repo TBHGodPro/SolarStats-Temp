@@ -52,6 +52,8 @@ export function loadPlugin(
 
   const Logging: Logger = new Logger(file.substring(0, file.length - 3));
 
+  let playerModules: PlayerModule[] = [];
+
   const context = createContext({
     ...global,
     dirFetch: fetch,
@@ -115,7 +117,10 @@ export function loadPlugin(
       player.commandHandler.registerCommand(command.setPlayer(player));
     },
     registerPlayerModule: (playerModule: PlayerModule): void => {
-      player.modules.push(playerModule.setPlayer(player));
+      if (!playerModules) {
+        playerModule.createdBy = info;
+        player.modules.push(playerModule.setPlayer(player));
+      } else playerModules.push(playerModule.setPlayer(player));
     },
     requireModule: (module: string): any => {
       try {
@@ -142,8 +147,16 @@ export function loadPlugin(
     return void Logging.error('An error occured while loading Plugin!', error);
   }
 
-  if (isPluginInfo(info)) return info;
-  else
+  if (isPluginInfo(info)) {
+    player.modules.push(
+      ...playerModules.map((m) => {
+        m.createdBy = info;
+        return m;
+      })
+    );
+    playerModules = null;
+    return info;
+  } else
     Logging.error(
       "This is not a valid Plugin. It doesn't export a valid plugin info. This plugin may work but make sure to call the `registerPlugin` function to register the plugin!"
     );

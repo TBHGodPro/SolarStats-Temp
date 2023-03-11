@@ -45,9 +45,15 @@ export async function getConfigAsync(): Promise<Config> {
 }
 
 export async function setValue(key: string, value: unknown): Promise<void> {
-  const config = JSON.parse(await readFile(filePath, 'utf8'));
+  const config = await getConfigAsync();
   config[key] = value;
   await writeFile(filePath, JSON.stringify(config, null, 2));
+  reloadConfig?.(config, false);
+}
+export function setValueSync(key: string, value: unknown): void {
+  const config = getConfig();
+  config[key] = value;
+  writeFileSync(filePath, JSON.stringify(config, null, 2));
   reloadConfig?.(config, false);
 }
 
