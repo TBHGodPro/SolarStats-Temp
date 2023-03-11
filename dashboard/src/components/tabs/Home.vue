@@ -4,15 +4,7 @@
       <div class="box box-3">
         <h1>Info</h1>
         <h3>Server: {{ $store.state.data.config.server.host }}</h3>
-        <h3>
-          Proxy IP
-          <small style="font-weight: 600"
-            ><small>(If hosts are configured correctly)</small></small
-          >: solarstats.hypixel.net:{{ $store.state.data.config.server.port }}
-          <small style="font-weight: 600"
-            >(127.0.0.1:{{ $store.state.data.config.server.port }})</small
-          >
-        </h3>
+        <h3>Proxy IP: 127.0.0.1:{{ $store.state.data.config.server.port }}</h3>
         <h2>
           {{ Object.keys($store.state.data.config.modules).length }}
           <small style="font-weight: 600">Modules</small>
