@@ -11,7 +11,8 @@
     "clean": "node ./scripts/clean.js",
     "build": "npm run clean && node ./scripts/build.js",
     "start": "node .",
-    "dev": "nodemon -x \"npm run build && npm start\" -e ts"
+    "dev": "nodemon -x \"npm run build && npm start\" -e ts",
+    "postinstall": "cd dashboard && npm install"
   },
   "repository": {
     "type": "git",
