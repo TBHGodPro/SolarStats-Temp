@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import SysTray, { MenuItem } from 'systray';
-import { reloadConfig } from '..';
+import { config, dashboard, reloadConfig } from '..';
 import Logger from '../Classes/Logger';
 
 export default function setupTray(): SysTray {
@@ -9,10 +9,10 @@ export default function setupTray(): SysTray {
 
   const items: MenuItem[] = [
     {
-      title: 'Show window',
-      tooltip: 'Hide or show the terminal window',
+      title: 'Show Dashboard',
+      tooltip: 'Show the Dashboard Window',
       checked: false,
-      enabled: process.platform === 'win32',
+      enabled: config.dashboard.enabled,
     },
     {
       title: 'Reload config',
@@ -45,20 +45,11 @@ export default function setupTray(): SysTray {
   systray.onClick(async (event) => {
     switch (event.seq_id) {
       case 0:
-        // When no `visible` argument is passed, the visibility is toggled
-        Logger.warn('Window visibility is not implemented yet');
-        systray.sendAction({
-          type: 'update-item',
-          item: {
-            ...event.item,
-            checked: !event.item.checked,
-          },
-          seq_id: event.seq_id,
-        });
+        dashboard.emit('focus', null);
         break;
       case 1:
         await reloadConfig();
-        Logger.info('Config reloaded');
+        Logger.info('Config Reloaded');
         break;
       case 2:
         systray.kill();

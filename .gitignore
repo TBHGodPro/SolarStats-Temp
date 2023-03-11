@@ -8,3 +8,4 @@ src/player/modules/stats.ts
 plugins/
 !plugins/ping.js
 !plugins/switchServer.js
+**/.DS_STORE

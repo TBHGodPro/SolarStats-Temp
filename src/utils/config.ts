@@ -9,7 +9,7 @@ const customConfigPath = process.argv
   ?.split('=')[1];
 const filePath = customConfigPath || './config.json';
 
-export default function getConfig(): Config {
+export function getConfig(): Config {
   const exists = existsSync(filePath);
 
   if (!exists) {
@@ -20,6 +20,19 @@ export default function getConfig(): Config {
   }
 
   return readConfigSync();
+}
+
+export async function getConfigAsync(): Promise<Config> {
+  const exists = existsSync(filePath);
+
+  if (!exists) {
+    Logger.info(
+      'Config does not exists! Creating a new one with default values...'
+    );
+    await writeFile(filePath, JSON.stringify(defaultConfig, null, 2));
+  }
+
+  return await readConfig();
 }
 
 export async function setValue(key: string, value: unknown): Promise<void> {
@@ -109,6 +122,10 @@ export const defaultConfig: Config = {
   server: {
     host: 'hypixel.net',
     port: 25565,
+  },
+  dashboard: {
+    enabled: true,
+    port: 7777,
   },
   customEmotes: {},
   checkForUpdates: true,

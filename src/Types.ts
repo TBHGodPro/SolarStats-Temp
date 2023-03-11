@@ -8,6 +8,10 @@ export interface Config {
     host: string;
     port: number;
   };
+  dashboard: {
+    enabled: boolean;
+    port: number;
+  };
   customEmotes: { [key: string]: string };
   checkForUpdates: boolean;
   autoDownloadUpdates: boolean;

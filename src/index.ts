@@ -8,16 +8,16 @@ import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
 import Listener from './Classes/Listener';
 import Logger from './Classes/Logger';
+import initDashboard from './dashboard';
 import Player from './player/Player';
 import PlayerModule from './player/PlayerModule';
-import getConfig, { readConfig } from './utils/config';
+import { getConfig, getConfigAsync } from './utils/config';
 import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
 import update from './utils/updater';
-import initDashboard from './dashboard';
 
 export async function reloadConfig() {
-  config = await readConfig();
+  config = await getConfigAsync();
 }
 export const isPacked: boolean = Object.prototype.hasOwnProperty.call(
   process,
@@ -30,6 +30,12 @@ export const version = JSON.parse(
   )
 ).version;
 export let config = getConfig();
+if (
+  !/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(
+    config.apiKey
+  )
+)
+  throw 'Please put in a valid Hypixel API Key into the config.json file';
 export const hypixelClient = createClient(config.apiKey);
 export const dashboard = initDashboard();
 

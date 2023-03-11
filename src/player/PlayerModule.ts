@@ -1,8 +1,8 @@
+import { Status } from 'hypixel-api-reborn';
 import Item from '../Classes/Item';
 import { ListenerEvents } from '../Types';
-import Player from './Player';
-import { Status } from 'hypixel-api-reborn';
 import { readConfigSync } from '../utils/config';
+import Player from './Player';
 
 enum Events {
   CustomCode = 'customCode',

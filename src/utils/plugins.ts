@@ -1,24 +1,27 @@
+import { StringComponentBuilder } from '@minecraft-js/chat';
+import axios from 'axios';
+import fetch from 'node-fetch';
 import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
+import { parse as parseNBT } from 'prismarine-nbt';
 import Command from '../Classes/Command';
 import Inventory from '../Classes/Inventory';
-import { InventoryType } from '../Types';
 import Item from '../Classes/Item';
 import Logger from '../Classes/Logger';
 import Player from '../player/Player';
 import PlayerModule from '../player/PlayerModule';
+import { InventoryType } from '../Types';
 import { readConfig, readConfigSync } from './config';
-import { StringComponentBuilder } from '@minecraft-js/chat';
-import { parse as parseNBT } from 'prismarine-nbt';
-import fetch from 'node-fetch';
-import axios from 'axios';
 
-export default async function loadPlugins(player: Player): Promise<void> {
-  const folder = 'plugins';
+export async function getPlugins(folder = 'plugins'): Promise<string[]> {
   await stat(folder).catch(async () => await mkdir(folder));
 
-  const files = await readdir(folder);
+  return await readdir(folder);
+}
+
+export default async function loadPlugins(player: Player): Promise<void> {
+  const files = await getPlugins();
 
   for (const file of files) {
     if (!file.endsWith('.js')) continue;
@@ -26,7 +29,7 @@ export default async function loadPlugins(player: Player): Promise<void> {
     try {
       const loadedPlugin = loadPlugin(
         player,
-        await readFile(join(folder, file), 'utf8'),
+        await readFile(join('plugins', file), 'utf8'),
         file
       );
       if (loadedPlugin) {
