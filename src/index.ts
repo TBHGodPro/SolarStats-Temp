@@ -149,7 +149,7 @@ proxy.on('end', (username) => {
   player.disconnect();
 });
 
-setupTray();
+if (!config.dashboard.enabled || process.platform !== 'darwin') setupTray();
 
 // Statistics
 if (config.statistics && !process.argv.includes('--noTracking'))

@@ -4,12 +4,12 @@ module.exports = {
       nodeIntegration: true,
       outputDir: 'dist',
       builderOptions: {
-        appId: 'com.solartweaks.launcher',
-        productName: 'Solar Tweaks',
+        appId: 'com.solarstats.dashboard',
+        productName: 'SolarStats Dashboard',
         win: {
           target: 'nsis',
           icon: 'build/icons/win/icon.ico',
-          publisherName: 'Solar Tweaks',
+          publisherName: 'SolarStats Dashboard',
           verifyUpdateCodeSignature: true,
           requestedExecutionLevel: 'asInvoker',
         },
@@ -22,11 +22,11 @@ module.exports = {
         },
         linux: {
           target: 'AppImage',
-          maintainer: 'Solar Tweaks',
+          maintainer: 'SolarStats Dashboard',
           vendor: 'Solar Tweaks',
-          icon: 'build/icons/linux/1024x1024.png',
-          synopsis: 'Solar Tweaks',
-          description: 'Solar Tweaks',
+          icon: 'build/icons/linux/icon.png',
+          synopsis: 'SolarStats Dashboard',
+          description: 'SolarStats Dashboard',
           category: 'Game',
         },
         mac: {

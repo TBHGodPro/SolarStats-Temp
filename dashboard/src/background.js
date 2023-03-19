@@ -1,10 +1,11 @@
 'use strict';
 
 require('@electron/remote/main').initialize();
-import { app, BrowserWindow, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, Menu } from 'electron';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
+import { cwd } from './cwd';
 
 const isDevelopment = !!process.env.WEBPACK_DEV_SERVER_URL;
 
@@ -14,18 +15,11 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 let PORT;
-
 try {
-  PORT = JSON.parse(
-    isDevelopment
-      ? readFileSync(join(process.cwd(), '../config.json'), 'utf-8')
-      : readFileSync(join(process.cwd(), 'config.json'), 'utf-8')
-  ).dashboard.port;
+  PORT = JSON.parse(readFileSync(join(cwd, 'config.json'), 'utf-8')).dashboard
+    .port;
 } catch {}
-
 if (!PORT) PORT = 7777;
-
-if (!isDevelopment && app.dock) app.dock.hide();
 
 async function createWindow() {
   // Create the browser window.
@@ -36,7 +30,6 @@ async function createWindow() {
     maximizable: false,
     fullscreenable: false,
     resizable: false,
-    skipTaskbar: true,
     focusable: true,
     webPreferences: {
       nodeIntegration: true,
@@ -69,9 +62,7 @@ async function createWindow() {
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
@@ -84,17 +75,29 @@ app.on('activate', () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', async () => createWindow());
+app.on('ready', () => {
+  createWindow();
 
-// Exit cleanly on request from parent process.
-if (process.platform === 'win32') {
-  process.on('message', (data) => {
-    if (data === 'graceful-exit') {
-      app.quit();
-    }
-  });
-} else {
-  process.on('SIGTERM', () => {
-    app.quit();
-  });
-}
+  if (process.platform === 'darwin') {
+    const dockMenu = Menu.buildFromTemplate([
+      {
+        label: 'Reload Config',
+        click() {
+          BrowserWindow.getAllWindows().forEach((win) =>
+            win.webContents.send('Action', 'ReloadConfig')
+          );
+        },
+      },
+      {
+        label: 'Kill Process',
+        click() {
+          BrowserWindow.getAllWindows().forEach((win) =>
+            win.webContents.send('Action', 'KillProcess')
+          );
+        },
+      },
+    ]);
+
+    app.dock.setMenu(dockMenu);
+  }
+});

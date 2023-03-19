@@ -1,5 +1,6 @@
 import { Game } from 'hypixel-api-reborn';
 import { exec } from 'node:child_process';
+import { readdir } from 'node:fs/promises';
 import { createServer, IncomingMessage } from 'node:http';
 import { join } from 'node:path';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -53,11 +54,38 @@ export class DashboardManager {
       httpServer.listen(config.dashboard.port);
 
       if (config.dashboard.enabled)
-        setTimeout(() => {
+        setTimeout(async () => {
+          const dist = join(process.cwd(), 'dashboard/dist');
+          const product = join(
+            dist,
+            (await readdir(dist)).find(
+              (i) => !i.includes('.') && i !== 'bundled'
+            )
+          );
+          const file = join(
+            product,
+            (await readdir(product)).find((i) => !i.startsWith('.'))
+          );
+
+          let command;
+          switch (process.platform) {
+            case 'darwin':
+              command = `open "${file}"`;
+              break;
+            case 'win32':
+              command = `start "" "${file}"`;
+              break;
+            default:
+              return logger.error(
+                `Dashboard is not allowed on this operating system (${process.platform})`
+              );
+          }
+
           if (this.socket) this.emit('focus', null);
           else
             exec(
-              `npx electron "${join(process.cwd(), 'dashboard/dist/bundled')}"`,
+              // `npx electron "${join(process.cwd(), 'dashboard/dist/bundled')}"`,
+              command,
               (err, out) => {
                 if (err) logger.error('[Dashboard Error]', err);
               }

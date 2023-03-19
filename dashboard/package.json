@@ -4,16 +4,16 @@
   "description": "",
   "main": "background.js",
   "scripts": {
-    "lint": "vue-cli-service lint",
-    "build": "vue-cli-service electron:build --linux dir",
-    "serve": "vue-cli-service electron:serve"
+    "setupCWD": "node setupCWD.js",
+    "build": "npm run setupCWD && vue-cli-service electron:build",
+    "serve": "npm run setupCWD && vue-cli-service electron:serve",
+    "postinstall": "npm run setupCWD"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "vue": "^3.2.47",
-    "vuex": "^4.1.0",
-    "ws": "^8.13.0"
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@electron/remote": "^2.0.9",

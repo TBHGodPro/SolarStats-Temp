@@ -4,7 +4,6 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import constants from './constants';
 import store, { showNotification } from './store';
-import WebSocket from '../node_modules/ws/wrapper.mjs';
 
 import './assets/global.css';
 
@@ -31,7 +30,7 @@ ipcRenderer.once('PORT', async (_, port) => {
       ws.onclose = () => {
         store.state.ws = null;
         console.log('[WebSocket] Disconnected');
-        setTimeout(() => setup(), 2500);
+        setTimeout(() => setup(), 2000);
       };
       ws.onmessage = async ({ data: raw }) => {
         /** @type {{ op: string, data: any }} */
@@ -82,4 +81,27 @@ ipcRenderer.once('PORT', async (_, port) => {
     });
   }
   setup();
+});
+
+ipcRenderer.on('Action', (_, action) => {
+  switch (action) {
+    case 'ReloadConfig':
+      store.dispatch('sendMessage', {
+        op: 'reloadConfig',
+        dontSave: true,
+      });
+      break;
+    case 'KillProcess':
+      store.dispatch('sendMessage', {
+        op: 'kill',
+        dontSave: true,
+      });
+      store.state.ws?.close?.();
+      showNotification(
+        'Success!',
+        'Successfully killed the process',
+        'success'
+      );
+      break;
+  }
 });

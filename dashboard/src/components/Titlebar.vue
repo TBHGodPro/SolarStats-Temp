@@ -29,13 +29,20 @@
           color: rgb(59, 161, 219);
           background-color: rgba(59, 161, 219, 0.2);
         "
+        v-bind:class="{
+          disabled: !$store.getters.isConnected,
+        }"
         @mouseenter="
-          showTooltip(
-            'Reload Config',
-            'Checks and Reloads if the Config File has been Updated'
-          )
+          $store.getters.isConnected
+            ? showTooltip(
+                'Reload Config',
+                'Checks and Reloads if the Config File has been Updated'
+              )
+            : hideTooltip()
         "
-        @mousemove="moveTooltip"
+        @mousemove="
+          $store.getters.isConnected ? moveTooltip($event) : hideTooltip()
+        "
         @mouseleave="hideTooltip"
       ></button>
       <button
@@ -45,8 +52,17 @@
           color: rgb(219, 59, 104);
           background-color: rgba(219, 59, 104, 0.2);
         "
-        @mouseenter="showTooltip('Kill', 'Kill the SolarStats Process')"
-        @mousemove="moveTooltip"
+        v-bind:class="{
+          disabled: !$store.getters.isConnected,
+        }"
+        @mouseenter="
+          $store.getters.isConnected
+            ? showTooltip('Kill', 'Kill the SolarStats Process')
+            : hideTooltip()
+        "
+        @mousemove="
+          $store.getters.isConnected ? moveTooltip($event) : hideTooltip()
+        "
         @mouseleave="hideTooltip"
       ></button>
     </div>
@@ -97,7 +113,7 @@ export default {
         op: 'kill',
         dontSave: true,
       });
-      this.$store.state.ws?.close();
+      this.$store.state.ws?.close?.();
       showNotification(
         'Success!',
         'Successfully killed the process',
@@ -193,6 +209,10 @@ export default {
 }
 .action:hover {
   filter: brightness(1.2);
+}
+.action.disabled {
+  filter: brightness(0.8);
+  cursor: default;
 }
 
 #tabs {
