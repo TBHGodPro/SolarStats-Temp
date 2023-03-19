@@ -20,6 +20,8 @@ const command = new Command(
 );
 
 command.onTriggered = async (chatCommand, args) => {
+  await getConfigAsync();
+
   const player = command.player;
 
   const action = command.getStringArgument(args, 0, true);
@@ -81,18 +83,28 @@ command.onTriggered = async (chatCommand, args) => {
 
   for (const module of command.player.modules) {
     if (!Object.prototype.hasOwnProperty.call(module, 'settingItem')) return;
+
     const slot = Object.keys(inventory.items).length - 3;
+    module.settingItem.lore[
+      module.settingItem.lore.find((i) => i.startsWith('§7Current: '))
+        ? module.settingItem.lore.findIndex((i) => i.startsWith('§7Current: '))
+        : module.settingItem.lore.length
+    ] = `§7Current: §${
+      config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'
+    }`;
     inventory.addItem(module.settingItem, slot);
+
     settingsMutator[slot] = async (event) => {
       event.cancel(player.client);
       const newConfig = { ...config.modules };
       newConfig[module.configKey] = !config.modules[module.configKey];
       await setValue('modules', newConfig);
-      await getConfigAsync();
       module.settingItem.lore[
-        module.settingItem.lore.indexOf(
-          module.settingItem.lore.find((i) => i.includes('§7Current: '))
-        )
+        module.settingItem.lore.find((i) => i.startsWith('§7Current: '))
+          ? module.settingItem.lore.findIndex((i) =>
+              i.startsWith('§7Current: ')
+            )
+          : module.settingItem.lore.length
       ] = `§7Current: §${
         config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'
       }`;
@@ -127,10 +139,6 @@ command.onTriggered = async (chatCommand, args) => {
           }),
         });
         break;
-      case 12:
-      case 44:
-        event.cancel(player.client);
-        break;
       case 36:
         event.cancel(player.client);
 
@@ -147,6 +155,9 @@ command.onTriggered = async (chatCommand, args) => {
         break;
       case 40:
         inventory.close(player);
+        break;
+      case 44:
+        event.cancel(player.client);
         break;
       default:
         // Other slot, handling here
