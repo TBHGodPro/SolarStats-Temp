@@ -1,7 +1,7 @@
 'use strict';
 
 require('@electron/remote/main').initialize();
-import { app, BrowserWindow, ipcMain, protocol, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, protocol } from 'electron';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
@@ -72,12 +72,24 @@ app.on('activate', () => {
   else BrowserWindow.getAllWindows().forEach((win) => win.show());
 });
 
+let isConnected = false;
+ipcMain.on('ConnectionState', (_, connected) => {
+  if (isConnected !== connected) {
+    isConnected = connected;
+    setupDock();
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   createWindow();
 
+  setupDock();
+});
+
+function setupDock() {
   if (process.platform === 'darwin') {
     const dockMenu = Menu.buildFromTemplate([
       {
@@ -87,6 +99,16 @@ app.on('ready', () => {
             win.webContents.send('Action', 'ReloadConfig')
           );
         },
+        enabled: isConnected,
+      },
+      {
+        label: 'Start SolarStats',
+        click() {
+          BrowserWindow.getAllWindows().forEach((win) =>
+            win.webContents.send('Action', 'StartProcess')
+          );
+        },
+        enabled: !isConnected,
       },
       {
         label: 'Kill Process',
@@ -95,9 +117,10 @@ app.on('ready', () => {
             win.webContents.send('Action', 'KillProcess')
           );
         },
+        enabled: isConnected,
       },
     ]);
 
     app.dock.setMenu(dockMenu);
   }
-});
+}

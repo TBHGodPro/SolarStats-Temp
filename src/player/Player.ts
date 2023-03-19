@@ -1,6 +1,6 @@
 import {
   LunarClientPlayer,
-  NotificationLevel
+  NotificationLevel,
 } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client } from 'minecraft-protocol';

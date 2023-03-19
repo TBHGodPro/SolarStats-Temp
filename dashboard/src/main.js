@@ -1,8 +1,10 @@
 import * as remote from '@electron/remote';
+import { exec } from 'child_process';
 import { ipcRenderer } from 'electron';
 import { createApp } from 'vue';
 import App from './App.vue';
 import constants from './constants';
+import { cwd } from './cwd';
 import store, { showNotification } from './store';
 
 import './assets/global.css';
@@ -13,11 +15,14 @@ const app = createApp(App).use(store).mount('#app');
 
 ipcRenderer.once('PORT', async (_, port) => {
   const started = Date.now();
+  let failedAttempts = 0;
   function setup() {
     return new Promise((res, rej) => {
       const ws = new WebSocket(`ws://localhost:${port}`);
 
       ws.onopen = () => {
+        ipcRenderer.send('ConnectionState', true);
+        failedAttempts = 0;
         store.state.failedPackets.forEach((p) => ws.send(p));
         store.state.failedPackets = [];
         console.log('[WebSocket] Connected!');
@@ -28,9 +33,24 @@ ipcRenderer.once('PORT', async (_, port) => {
         rej(err);
       };
       ws.onclose = () => {
+        ipcRenderer.send('ConnectionState', false);
+        failedAttempts += 1;
         store.state.ws = null;
         console.log('[WebSocket] Disconnected');
-        setTimeout(() => setup(), 2000);
+        setTimeout(() => setup(), 500);
+        if (failedAttempts >= 6 && !store.state.ready) {
+          failedAttempts = 0;
+          console.log(
+            '[WebSocket] Failed to connect 6 times, starting process'
+          );
+          exec(`cd "${cwd}" && node .`);
+          showNotification(
+            'Unable to connect',
+            'Failed to connect to SolarStats<br/>Started new SolarStats process',
+            'info',
+            3500
+          );
+        }
       };
       ws.onmessage = async ({ data: raw }) => {
         /** @type {{ op: string, data: any }} */
@@ -83,15 +103,28 @@ ipcRenderer.once('PORT', async (_, port) => {
   setup();
 });
 
+setInterval(
+  () => ipcRenderer.send('ConnectionState', store.getters.isConnected),
+  500
+);
+
 ipcRenderer.on('Action', (_, action) => {
+  console.log(action, store.getters.isConnected);
   switch (action) {
     case 'ReloadConfig':
+      if (!store.getters.isConnected) return;
       store.dispatch('sendMessage', {
         op: 'reloadConfig',
         dontSave: true,
       });
       break;
+    case 'StartProcess':
+      if (store.getters.isConnected) return;
+      exec(`cd "${cwd}" && node .`);
+      showNotification('Success!', 'Started SolarStats!', 'success');
+      break;
     case 'KillProcess':
+      if (!store.getters.isConnected) return;
       store.dispatch('sendMessage', {
         op: 'kill',
         dontSave: true,

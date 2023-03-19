@@ -6,12 +6,13 @@
       hide: !$store.state.notification.showing,
 
       'notification-info': $store.state.notification.data?.type === 'info',
-      'notification-success': $store.state.notification.data?.type === 'success',
+      'notification-success':
+        $store.state.notification.data?.type === 'success',
       'notification-fail': $store.state.notification.data?.type === 'fail',
     }"
   >
-    <h1>{{ $store.state.notification.data?.title }}</h1>
-    <p>{{ $store.state.notification.data?.message }}</p>
+    <h1 v-html="$store.state.notification.data?.title"></h1>
+    <p v-html="$store.state.notification.data?.message"></p>
   </div>
 </template>
 

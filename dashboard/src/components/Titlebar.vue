@@ -24,7 +24,7 @@
     <div id="actions">
       <button
         class="action fa-solid fa-arrow-rotate-left"
-        @click="reloadConfig()"
+        @click="if ($store.getters.isConnected) reloadConfig();"
         style="
           color: rgb(59, 161, 219);
           background-color: rgba(59, 161, 219, 0.2);
@@ -46,8 +46,28 @@
         @mouseleave="hideTooltip"
       ></button>
       <button
+        class="action fa-solid fa-play"
+        @click="if (!$store.getters.isConnected) startProcess();"
+        style="
+          color: rgb(59, 219, 104);
+          background-color: rgba(59, 219, 104, 0.2);
+        "
+        v-bind:class="{
+          disabled: $store.getters.isConnected,
+        }"
+        @mouseenter="
+          !$store.getters.isConnected
+            ? showTooltip('Start', 'Start the SolarStats process')
+            : hideTooltip()
+        "
+        @mousemove="
+          !$store.getters.isConnected ? moveTooltip($event) : hideTooltip()
+        "
+        @mouseleave="hideTooltip"
+      ></button>
+      <button
         class="action fa-solid fa-skull"
-        @click="killProcess()"
+        @click="if ($store.getters.isConnected) killProcess();"
         style="
           color: rgb(219, 59, 104);
           background-color: rgba(219, 59, 104, 0.2);
@@ -84,7 +104,9 @@
 
 <script>
 import { getCurrentWindow } from '@electron/remote';
+import { exec } from 'child_process';
 import { showNotification } from '../store';
+import { cwd } from '../cwd';
 
 export default {
   name: 'TitleBar',
@@ -108,6 +130,10 @@ export default {
       getCurrentWindow().hide();
     },
 
+    startProcess() {
+      exec(`cd "${cwd}" && node .`);
+      showNotification('Success!', 'Started SolarStats!', 'success');
+    },
     killProcess() {
       this.$store.dispatch('sendMessage', {
         op: 'kill',
@@ -133,8 +159,8 @@ export default {
       this.tooltip.show = true;
     },
     moveTooltip(event) {
-      this.tooltip.x = event.clientX + 20;
-      this.tooltip.y = event.clientY - 40;
+      this.tooltip.x = event.clientX - 100;
+      this.tooltip.y = event.clientY + 20;
     },
     hideTooltip() {
       this.tooltip.show = false;
@@ -190,7 +216,7 @@ export default {
 #actions {
   -webkit-app-region: none;
   position: absolute;
-  right: 300px;
+  right: 100px;
   top: 10px;
   display: flex;
 }
@@ -211,7 +237,7 @@ export default {
   filter: brightness(1.2);
 }
 .action.disabled {
-  filter: brightness(0.8);
+  filter: brightness(0.6);
   cursor: default;
 }
 
