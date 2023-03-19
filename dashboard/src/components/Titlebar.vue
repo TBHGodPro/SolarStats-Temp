@@ -104,9 +104,8 @@
 
 <script>
 import { getCurrentWindow } from '@electron/remote';
-import { exec } from 'child_process';
 import { showNotification } from '../store';
-import { cwd } from '../cwd';
+import { startProcess } from '../main';
 
 export default {
   name: 'TitleBar',
@@ -131,7 +130,7 @@ export default {
     },
 
     startProcess() {
-      exec(`cd "${cwd}" && node .`);
+      startProcess();
       showNotification('Success!', 'Started SolarStats!', 'success');
     },
     killProcess() {

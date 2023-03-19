@@ -43,7 +43,7 @@ ipcRenderer.once('PORT', async (_, port) => {
           console.log(
             '[WebSocket] Failed to connect 6 times, starting process'
           );
-          exec(`cd "${cwd}" && node .`);
+          startProcess();
           showNotification(
             'Unable to connect',
             'Failed to connect to SolarStats<br/>Started new SolarStats process',
@@ -109,7 +109,6 @@ setInterval(
 );
 
 ipcRenderer.on('Action', (_, action) => {
-  console.log(action, store.getters.isConnected);
   switch (action) {
     case 'ReloadConfig':
       if (!store.getters.isConnected) return;
@@ -120,7 +119,7 @@ ipcRenderer.on('Action', (_, action) => {
       break;
     case 'StartProcess':
       if (store.getters.isConnected) return;
-      exec(`cd "${cwd}" && node .`);
+      startProcess();
       showNotification('Success!', 'Started SolarStats!', 'success');
       break;
     case 'KillProcess':
@@ -138,3 +137,20 @@ ipcRenderer.on('Action', (_, action) => {
       break;
   }
 });
+
+export function startProcess() {
+  let command = `cd "${cwd}" && `;
+  switch (process.platform) {
+    case 'darwin':
+      command += '/usr/local/bin/node .';
+      break;
+    case 'win32':
+      command += '"C:/Program Files/nodejs/node.exe" .';
+      break;
+    default:
+      command += 'node .';
+      break;
+  }
+
+  exec(command, (err) => (err ? console.error(err) : null));
+}
