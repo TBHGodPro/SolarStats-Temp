@@ -2,9 +2,11 @@ import * as chalk from 'chalk';
 
 export default class Logger {
   private identifier?: string;
+  private isPluginLogger: boolean;
 
-  constructor(identifier?: string) {
+  constructor(identifier?: string, isPluginLogger?: boolean) {
     this.identifier = identifier;
+    this.isPluginLogger = isPluginLogger ?? false;
   }
 
   public setIdentifier(identifier: string) {
@@ -13,7 +15,11 @@ export default class Logger {
 
   private getPrefix() {
     return this.identifier
-      ? [chalk.bgBlueBright.black(` ${this.identifier} `)]
+      ? [
+          this.isPluginLogger
+            ? chalk.bgGreen.black(` ${this.identifier} `)
+            : chalk.bgBlueBright.black(` ${this.identifier} `),
+        ]
       : [];
   }
 

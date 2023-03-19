@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "vue": "^3.2.47",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@electron/remote": "^2.0.9",

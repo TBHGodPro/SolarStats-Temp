@@ -50,7 +50,7 @@ export function loadPlugin(
 ): PluginInfo {
   let info: PluginInfo;
 
-  const Logging: Logger = new Logger(file.substring(0, file.length - 3));
+  const Logging: Logger = new Logger(file.substring(0, file.length - 3), true);
 
   let playerModules: PlayerModule[] = [];
 

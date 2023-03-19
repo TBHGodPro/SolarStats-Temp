@@ -4,6 +4,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import constants from './constants';
 import store, { showNotification } from './store';
+import WebSocket from '../node_modules/ws/wrapper.mjs';
 
 import './assets/global.css';
 

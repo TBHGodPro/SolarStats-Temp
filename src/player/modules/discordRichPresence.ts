@@ -72,18 +72,21 @@ export async function disableActivity() {
   activity = null;
 }
 
-discordClient
-  .login({ clientId })
-  .then((client) => {
-    if (client) {
-      logger.info(`Authed for user ${client.user.username}`);
+export async function login() {
+  try {
+    const c = await discordClient.login({ clientId });
+
+    if (c) {
+      logger.info(`Authed for user ${c.user.username}`);
       if (playerModule.enabled) enableActivity();
       else disableActivity();
     } else logger.error('Failed to login to Discord RPC');
-  })
-  .catch((err) =>
-    logger.error('An error occured while logging in to Discord RPC', err)
-  );
+  } catch (err) {
+    logger.error('Failed to login to Discord RPC', err);
+  }
+}
+
+login();
 
 playerModule.onConfigChange = async (enabled) => {
   if (enabled) enableActivity();
