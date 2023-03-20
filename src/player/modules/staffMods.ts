@@ -19,7 +19,7 @@ const playerModule = new PlayerModule(
   'staffMods'
 );
 
-function enabledStaffMods() {
+function enableStaffMods() {
   player.lcPlayer?.sendNotification(
     'Enabled Staff Mods',
     1500,
@@ -43,12 +43,12 @@ function disableStaffMods() {
 }
 
 playerModule.customCode = async () => {
-  if (playerModule.enabled) enabledStaffMods();
+  if (playerModule.enabled) enableStaffMods();
   else disableStaffMods();
 };
 
 playerModule.onConfigChange = (enabled) => {
-  if (enabled) enabledStaffMods();
+  if (enabled) enableStaffMods();
   else disableStaffMods();
 };
 
