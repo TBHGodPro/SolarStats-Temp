@@ -6,7 +6,6 @@ import * as https from 'node:https';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
-import Listener from './Classes/Listener';
 import Logger from './Classes/Logger';
 import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
@@ -100,8 +99,6 @@ const proxy = new InstantConnectProxy({
 });
 Logger.info('Proxy started');
 
-export const listener = new Listener(proxy);
-
 export const modules: PlayerModule[] = [];
 readdirSync(join(__dirname, 'player', 'modules')).forEach((file) => {
   try {
@@ -119,32 +116,18 @@ readdirSync(join(__dirname, 'player', 'modules')).forEach((file) => {
 
 writeFileSync(filePath, JSON.stringify(config, null, 2));
 
-export const player = new Player(listener, proxy, modules);
-
-proxy.on('incoming', (data, meta, toClient) => {
-  if (player.overriddenPackets.incoming.includes(meta.name)) return;
-
-  toClient.write(meta.name, data);
-});
-
-proxy.on('outgoing', (data, meta, toClient, toServer) => {
-  if (player.overriddenPackets.outgoing.includes(meta.name)) return;
-  // Custom inventories
-  if (meta.name === 'window_click' && data.windowId === 255) return;
-
-  toServer.write(meta.name, data);
-});
+export const player = new Player(proxy, modules);
 
 // Triggered when the player connects
 // AND changes server (when connected to a proxy like Bungeecord) for some reason
-proxy.on('start', (client, server) => {
+player.proxyHandler.on('start', (client, server) => {
   if (!player.online) {
     Logger.info(`${chalk.italic.bold(client.username)} connected to the proxy`);
     player.connect(client, server);
   }
 });
 
-proxy.on('end', (username) => {
+player.proxyHandler.on('end', (username) => {
   Logger.info(`${chalk.italic.bold(username)} disconnected from the proxy`);
   player.disconnect();
 });

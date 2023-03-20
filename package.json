@@ -40,6 +40,7 @@
     "node-downloader-helper": "^2.1.0",
     "nodemon": "^2.0.19",
     "prismarine-proxy": "^1.1.1",
+    "structured-clone": "^0.2.2",
     "systray": "^1.0.5",
     "uuid": "^8.3.2",
     "ws": "^8.12.1"

@@ -38,14 +38,14 @@ command.onTriggered = (chatCommand, args) => {
 
   const timeout = command.getNumberArgument(args, 0);
 
-  command.player.proxy.on('incoming', callback);
+  command.player.proxyHandler.on('fromServer', callback);
   command.player.lcPlayer.sendNotification(
     `Dumping packets for ${timeout}ms...`,
     2500
   );
 
   setTimeout(async () => {
-    command.player.proxy.removeListener('incoming', callback);
+    command.player.proxyHandler.removeListener('fromServer', callback);
     await writeFile('packetDump.json', JSON.stringify(packets, null, 2));
 
     command.player.lcPlayer.sendNotification(

@@ -1,6 +1,6 @@
 import {
-  LunarClientPlayer,
-  NotificationLevel,
+    LunarClientPlayer,
+    NotificationLevel
 } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client } from 'minecraft-protocol';
@@ -16,6 +16,7 @@ import { IPlayer, Team } from '../Types';
 import { fetchPlayerLocation } from '../utils/hypixel';
 import loadPlugins, { PluginInfo } from '../utils/plugins';
 import PlayerModule from './PlayerModule';
+import PlayerProxyHandler from './PlayerProxyHandler';
 
 export default class Player {
   public readonly crashedModules: PlayerModule[];
@@ -24,37 +25,30 @@ export default class Player {
   public readonly plugins: PluginInfo[];
   public readonly proxy: InstantConnectProxy;
   public readonly commandHandler: CommandHandler;
+  public readonly proxyHandler: PlayerProxyHandler;
 
   public client?: Client;
   public lastGameMode?: string;
   public lcPlayer?: LunarClientPlayer;
   public online?: boolean;
-  public overriddenPackets: { incoming: string[]; outgoing: string[] };
   public server?: Client;
   public status?: Status;
   public teams?: Team[];
   public connectedPlayers: IPlayer[];
   public uuid?: string;
 
-  public constructor(
-    listener: Listener,
-    proxy: InstantConnectProxy,
-    modules: PlayerModule[]
-  ) {
+  public constructor(proxy: InstantConnectProxy, modules: PlayerModule[]) {
     this.crashedModules = [];
-    this.listener = listener;
     this.modules = modules;
     this.plugins = [];
     this.proxy = proxy;
 
+    this.proxyHandler = new PlayerProxyHandler(this);
+    this.listener = new Listener(this.proxyHandler);
+
     this.listener.setMaxListeners(0);
     this.proxy.setMaxListeners(0);
-
-    // Packets that have a custom handling
-    this.overriddenPackets = {
-      incoming: [],
-      outgoing: ['chat', 'block_place'],
-    };
+    this.proxyHandler.setMaxListeners(0);
 
     const commands: Command[] = [];
     readdirSync(join(__dirname, '..', 'commands')).forEach((file) => {
@@ -73,7 +67,7 @@ export default class Player {
         Logger.error(`Couldn't load command ${file}`, error);
       }
     });
-    this.commandHandler = new CommandHandler(this.proxy).registerCommand(
+    this.commandHandler = new CommandHandler(this.proxyHandler).registerCommand(
       ...commands
     );
 

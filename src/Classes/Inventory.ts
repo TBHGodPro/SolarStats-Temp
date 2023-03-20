@@ -1,8 +1,8 @@
 import { Client, PacketMeta } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
-import { InstantConnectProxy } from 'prismarine-proxy';
 import TypedEmitter from 'typed-emitter';
 import Player from '../player/Player';
+import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import { InventoryEvents, InventoryType } from '../Types';
 import Item from './Item';
 
@@ -74,15 +74,15 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
       items,
     });
 
-    this.setupPacketHandlers(player.proxy);
-    player.proxy.on('incoming', this.incomingPacketHandler);
-    player.proxy.on('outgoing', this.outgoingPacketHandler);
+    this.setupPacketHandlers(player.proxyHandler);
+    player.proxyHandler.on('fromServer', this.incomingPacketHandler);
+    player.proxyHandler.on('fromClient', this.outgoingPacketHandler);
   }
 
   public close(player: Player): void {
     if (!this.opened) return;
 
-    this.markAsClosed(player.proxy);
+    this.markAsClosed(player.proxyHandler);
     player.client.write('close_window', {
       windowId: 50,
     });
@@ -96,17 +96,17 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
     });
   }
 
-  private markAsClosed(proxy: InstantConnectProxy): void {
+  private markAsClosed(proxyHandler: PlayerProxyHandler): void {
     this.emit('close');
     this.opened = false;
 
-    proxy.removeListener('incoming', this.incomingPacketHandler);
-    proxy.removeListener('outgoing', this.outgoingPacketHandler);
+    proxyHandler.removeListener('fromServer', this.incomingPacketHandler);
+    proxyHandler.removeListener('fromClient', this.outgoingPacketHandler);
   }
 
-  private setupPacketHandlers(proxy: InstantConnectProxy): void {
+  private setupPacketHandlers(proxyHandler: PlayerProxyHandler): void {
     this.incomingPacketHandler = (data, meta) => {
-      if (meta.name === 'open_window') this.markAsClosed(proxy);
+      if (meta.name === 'open_window') this.markAsClosed(proxyHandler);
     };
 
     this.outgoingPacketHandler = (
@@ -116,7 +116,10 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
       toServer: Client
     ) => {
       if (meta.name === 'close_window')
-        if (data.windowId === 50 && this.opened) this.markAsClosed(proxy);
+        if (data.windowId === 50 && this.opened) {
+          this.markAsClosed(proxyHandler);
+          return false;
+        }
 
       if (meta.name === 'window_click') {
         if (
@@ -144,6 +147,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
               });
             },
           });
+          return false;
         } else if (data.slot !== -999) {
           // click is in the player inventory not in the GUI
           // We need to cancel the click because the user can't modify to their real inventories while in the GUI

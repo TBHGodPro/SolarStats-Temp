@@ -1,18 +1,18 @@
 import { EventEmitter } from 'node:events';
-import { InstantConnectProxy } from 'prismarine-proxy';
 import TypedEmitter from 'typed-emitter';
 import { player } from '..';
+import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import { ListenerEvents } from '../Types';
 import Logger from './Logger';
 
 export default class Listener extends (EventEmitter as new () => TypedEmitter<ListenerEvents>) {
-  public constructor(proxy: InstantConnectProxy) {
+  public constructor(proxyHandler: PlayerProxyHandler) {
     super();
-    proxy.on('start', (toClient, toServer) => {
+    proxyHandler.on('start', (toClient, toServer) => {
       if (player.online) this.emit('switch_server', toServer);
     });
 
-    proxy.on('incoming', async (data, meta) => {
+    proxyHandler.on('fromServer', async (data, meta) => {
       // Chat packet
       if (meta.name === 'chat') {
         try {
@@ -102,7 +102,7 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
       }
     });
 
-    proxy.on('outgoing', (data, meta, toClient, toServer) => {
+    proxyHandler.on('fromClient', (data, meta, toClient, toServer) => {
       if (meta.name === 'block_place') {
         this.emit('place_block', data, toClient, toServer);
       }

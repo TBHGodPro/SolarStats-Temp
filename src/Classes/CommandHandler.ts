@@ -1,4 +1,4 @@
-import { InstantConnectProxy } from 'prismarine-proxy';
+import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import Command from './Command';
 import Logger from './Logger';
 
@@ -6,14 +6,14 @@ export default class CommandHandler {
   public commands: Command[];
   public commandsList: string[];
 
-  public constructor(proxy: InstantConnectProxy) {
+  public constructor(proxyHandler: PlayerProxyHandler) {
     this.commands = [];
     this.commandsList = [];
 
-    proxy.on('outgoing', (data, meta) => {
+    proxyHandler.on('fromClient', (data, meta, toClient, toServer) => {
       if (meta.name === 'chat') {
         const message: string = data.message.toLowerCase().split(' ')[0];
-        if (!this.commandsList.includes(message)) return;
+        if (!this.commandsList.includes(message)) return true;
 
         const commandS = message.replace('/', '');
         const command = this.commands.find(
@@ -25,11 +25,13 @@ export default class CommandHandler {
         args.shift();
         if (!command.validateSyntax(message, args)) {
           command.player.sendMessage(command.getSyntaxMessage());
-          return;
+          return false;
         }
 
         if (command) command.onTriggered(message, args);
         else Logger.warn(`Command ${message} not found`);
+
+        return false;
       }
     });
   }

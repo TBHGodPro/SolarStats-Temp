@@ -1,0 +1,74 @@
+import {
+    Client as PlayerClient,
+    PacketMeta,
+    ServerClient
+} from 'minecraft-protocol';
+import { EventEmitter } from 'node:events';
+import * as structuredClone from 'structured-clone';
+import TypedEmitter from 'typed-emitter';
+import Player from './Player';
+
+export type PlayerProxyHandlerEvents = {
+  start: (toClient: ServerClient, toServer: PlayerClient) => void;
+  end: (username: string) => void;
+
+  fromServer: (
+    data: any,
+    meta: PacketMeta,
+    toClient: ServerClient,
+    toServer: PlayerClient
+  ) => void | Promise<void> | boolean;
+  fromClient: (
+    data: any,
+    meta: PacketMeta,
+    toClient: ServerClient,
+    toServer: PlayerClient
+  ) => void | Promise<void> | boolean | Promise<boolean>;
+};
+
+export default class PlayerProxyHandler extends (EventEmitter as new () => TypedEmitter<PlayerProxyHandlerEvents>) {
+  public readonly player: Player;
+
+  constructor(player: Player) {
+    super();
+    this.player = player;
+
+    this.player.proxy.on('incoming', async (data, meta, toClient, toServer) => {
+      let send = true;
+
+      const msg = structuredClone(data);
+
+      const listeners = this.listeners('fromServer');
+
+      // TODO: Fix async support, caused lag spikes even on empty async functions
+      for (const func of listeners) {
+        const result = func(data, meta, toClient, toServer);
+        if (result === false) send = false;
+      }
+
+      if (send) toClient.write(meta.name, msg);
+    });
+
+    this.player.proxy.on('outgoing', async (data, meta, toClient, toServer) => {
+      // Custom inventories
+      if (meta.name === 'window_click' && data.windowId === 255) return;
+
+      let send = true;
+
+      const msg = structuredClone(data);
+
+      const listeners = this.listeners('fromClient');
+
+      // TODO: Fix async support, caused lag spikes even on empty async functions
+      for (const func of listeners) {
+        const result = func(data, meta, toClient, toServer);
+        if (result === false) send = false;
+      }
+
+      if (send) toServer.write(meta.name, msg);
+    });
+
+    this.player.proxy.on('start', (...args) => this.emit('start', ...args));
+    this.player.proxy.on('end', (...args) => this.emit('end', ...args));
+  }
+}

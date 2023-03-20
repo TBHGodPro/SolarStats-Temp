@@ -25,7 +25,6 @@ export default function () {
   return dashboard;
 }
 
-// TODO: Make protocol
 export class DashboardManager {
   public server: WebSocketServer;
 

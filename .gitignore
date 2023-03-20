@@ -5,10 +5,9 @@ config.json
 .vscode
 packetDump.json
 src/player/modules/stats.ts
-plugins/
-!plugins/ping.js
-!plugins/switchServer.js
-
 !dashboard/**
-
 **/.DS_STORE
+
+plugins/*
+
+!plugins/parkourTimer.js
