@@ -23,7 +23,7 @@ export type PlayerProxyHandlerEvents = {
     meta: PacketMeta,
     toClient: ServerClient,
     toServer: PlayerClient
-  ) => void | Promise<void> | boolean | Promise<boolean>;
+  ) => void | Promise<void> | boolean;
 };
 
 export default class PlayerProxyHandler extends (EventEmitter as new () => TypedEmitter<PlayerProxyHandlerEvents>) {
