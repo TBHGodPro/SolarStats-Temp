@@ -127,7 +127,7 @@ command.onTriggered = async (chatCommand, args) => {
         inventory.close(player);
         player.client?.write('chat', {
           message: JSON.stringify({
-            text: `§aYour API Key is\n§b${config.apiKey}`,
+            text: `\n\n    §aYour API Key is\n    §b${config.apiKey}\n\n`,
             clickEvent: {
               action: 'suggest_command',
               value: config.apiKey,
