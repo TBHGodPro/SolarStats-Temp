@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as chalk from 'chalk';
 import { ping } from 'minecraft-protocol';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import * as https from 'node:https';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
@@ -9,8 +9,7 @@ import { NIL } from 'uuid';
 import Logger from './Classes/Logger';
 import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
-import PlayerModule from './player/PlayerModule';
-import { Config } from './Types';
+import { Config, reloadEmotes } from './Types';
 import { filePath, getConfig } from './utils/config';
 import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
@@ -39,6 +38,7 @@ export const dashboard = initDashboard();
 export function reloadConfig(data: Config, log = true) {
   if (JSON.stringify(config) == JSON.stringify(data)) return;
   config = data;
+  reloadEmotes();
   if (log) {
     Logger.info('Config Reloaded');
     dashboard.emit('notification', {
@@ -99,24 +99,9 @@ const proxy = new InstantConnectProxy({
 });
 Logger.info('Proxy started');
 
-export const modules: PlayerModule[] = [];
-readdirSync(join(__dirname, 'player', 'modules')).forEach((file) => {
-  try {
-    if (!file.endsWith('.js')) return;
-    const module = require(join(__dirname, 'player', 'modules', file)).default;
-
-    if (module instanceof PlayerModule) {
-      config.modules[module.configKey] ??= module.enabled || false;
-      modules.push(module);
-    } else Logger.warn(`Module in file ${file} is not a valid module.`);
-  } catch (error) {
-    Logger.error(`Couldn't load module ${file}`, error);
-  }
-});
-
 writeFileSync(filePath, JSON.stringify(config, null, 2));
 
-export const player = new Player(proxy, modules);
+export const player = new Player(proxy);
 
 // Triggered when the player connects
 // AND changes server (when connected to a proxy like Bungeecord) for some reason

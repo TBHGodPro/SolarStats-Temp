@@ -1,6 +1,7 @@
 import { Waypoint } from '@minecraft-js/lunarbukkitapi';
 import { Player as HypixelPlayer } from 'hypixel-api-reborn';
-import { Client, ServerClient } from 'minecraft-protocol';
+import { Client } from 'minecraft-protocol';
+import { config } from '.';
 
 export interface Config {
   apiKey: string;
@@ -52,13 +53,6 @@ export interface PlayerInfo {
 export interface ListenerEvents {
   switch_server: (toServer: Client) => void;
   server_full: (playerCount: number) => void;
-  place_block: (
-    packet: BlockPlacePacket,
-    toClient: ServerClient,
-    toServer: Client
-  ) => void;
-  arrow_slot_empty: () => void;
-  arrow_slot_filled: () => void;
   team_create: (name: string) => void;
   team_delete: (name: string) => void;
   team_edit: (data: unknown) => void;
@@ -188,4 +182,49 @@ export interface IPlayer {
   name: string;
   uuid: string;
   entityId?: number;
+}
+
+export const baseEmotes = {
+  '<3': '❤',
+  ':star:': '✮',
+  ':yes:': '✔',
+  ':no:': '✖',
+  ':java:': '☕',
+  ':arrow:': '➜',
+  ':shrug:': '¯\\_(ツ)_/¯',
+  ':tableflip:': '(╯°□°）╯︵ ┻━┻',
+  'o/': '( ﾟ◡ﾟ)/',
+  ':123:': '①②③',
+  ':totem:': '☉_☉',
+  ':typing:': '✎...',
+  ':maths:': '√(π+x)=L',
+  ':snail:': "@'-'",
+  ':thinking:': '(0.o?)',
+  ':gimme:': '༼つ ◕◕ ༽つ',
+  ':wizard:': "('-')⊃━☆ﾟ.*･｡ﾟ",
+  ':pvp:': '⚔',
+  ':peace:': '✌',
+  ':oof:': 'OOF',
+  ':puffer:': "<('O')>",
+  ':yey:': 'ヽ (◕◡◕) ﾉ',
+  ':cat:': '= ＾● ⋏ ●＾ =',
+  ':dab:': '<o/',
+  ':dj:': 'ヽ(⌐■_■)ノ♬',
+  ':snow:': '☃',
+  '^_^': '^_^',
+  'h/': 'ヽ(^◇^*)/',
+  '^-^': '^-^',
+  ':sloth:': '(・⊝・)',
+  ':cute:': '(✿◠‿◠)',
+  ':dog:': '(ᵔᴥᵔ)',
+};
+export let emotes = {
+  ...baseEmotes,
+  ...config?.customEmotes,
+};
+export function reloadEmotes() {
+  emotes = {
+    ...baseEmotes,
+    ...config?.customEmotes,
+  };
 }

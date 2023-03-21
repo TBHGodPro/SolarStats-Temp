@@ -1,7 +1,7 @@
 import {
-    Client as PlayerClient,
-    PacketMeta,
-    ServerClient
+  Client as PlayerClient,
+  PacketMeta,
+  ServerClient
 } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import * as structuredClone from 'structured-clone';

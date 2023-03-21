@@ -1,6 +1,5 @@
 import { Status } from 'hypixel-api-reborn';
 import Item from '../Classes/Item';
-import { ListenerEvents } from '../Types';
 import { getConfig, setValueSync } from '../utils/config';
 import { PluginInfo } from '../utils/plugins';
 import Player from './Player';
@@ -15,12 +14,9 @@ enum Events {
 export default class PlayerModule {
   public readonly name: string;
   public readonly description: string;
-  public event: keyof ListenerEvents;
   public player: Player;
   public enabled: boolean;
 
-  public handler: Function;
-  public customCode: () => void;
   public onConfigChange: (enabled: boolean) => void;
   public onLocationUpdate: (status: Status) => void;
   public onDisconnect: () => void;
@@ -48,12 +44,8 @@ export default class PlayerModule {
         setValueSync('modules', newConfig);
         this.toggleEnabled(false);
       }
-    } else {
-      this.enabled = true;
-    }
+    } else this.enabled = true;
 
-    this.handler = () => {};
-    this.customCode = () => {};
     this.onConfigChange = () => {};
     this.onLocationUpdate = () => {};
     this.onDisconnect = () => {};

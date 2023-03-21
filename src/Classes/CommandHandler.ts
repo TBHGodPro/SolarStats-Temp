@@ -1,4 +1,5 @@
 import PlayerProxyHandler from '../player/PlayerProxyHandler';
+import { emotes } from '../Types';
 import Command from './Command';
 import Logger from './Logger';
 
@@ -13,7 +14,23 @@ export default class CommandHandler {
     proxyHandler.on('fromClient', (data, meta, toClient, toServer) => {
       if (meta.name === 'chat') {
         const message: string = data.message.toLowerCase().split(' ')[0];
-        if (!this.commandsList.includes(message)) return true;
+        if (!this.commandsList.includes(message)) {
+          const origMessage = data.message;
+          let newMessage = data.message;
+
+          for (const syntax in emotes)
+            if (Object.prototype.hasOwnProperty.call(emotes, syntax))
+              newMessage = newMessage.replaceAll(syntax, emotes[syntax]);
+
+          if (newMessage === origMessage) return true;
+          else {
+            toServer.write(meta.name, {
+              ...data,
+              message: newMessage,
+            });
+            return false;
+          }
+        }
 
         const commandS = message.replace('/', '');
         const command = this.commands.find(

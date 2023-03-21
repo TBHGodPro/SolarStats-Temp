@@ -42,10 +42,8 @@ function disableStaffMods() {
   player.lcPlayer?.setStaffModState(StaffMod.BUNNY_HOP, false);
 }
 
-playerModule.customCode = async () => {
-  if (playerModule.enabled) enableStaffMods();
-  else disableStaffMods();
-};
+if (playerModule.enabled) enableStaffMods();
+else disableStaffMods();
 
 playerModule.onConfigChange = (enabled) => {
   if (enabled) enableStaffMods();

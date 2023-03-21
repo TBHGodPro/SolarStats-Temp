@@ -4,7 +4,7 @@ import { readdir } from 'node:fs/promises';
 import { createServer, IncomingMessage } from 'node:http';
 import { join } from 'node:path';
 import { WebSocket, WebSocketServer } from 'ws';
-import { config, dashboard, modules, player } from '.';
+import { config, dashboard, player } from '.';
 import Logger from './Classes/Logger';
 import { updateActivity } from './player/modules/discordRichPresence';
 import { Config } from './Types';
@@ -80,8 +80,7 @@ export class DashboardManager {
               );
           }
 
-          if (this.socket) this.emit('focus', null);
-          else
+          if (!this.socket)
             exec(
               // `npx electron "${join(process.cwd(), 'dashboard/dist/bundled')}"`,
               command,
@@ -136,7 +135,7 @@ export class DashboardManager {
       startedAt: Date.now() - Math.floor(process.uptime() * 1000),
       config: await getConfigAsync(),
       plugins: player.plugins,
-      modules: modules.map((m) => ({
+      modules: player.modules.map((m) => ({
         name: m.name,
         description: m.description,
         enabled: m.enabled,
@@ -221,7 +220,7 @@ export async function updateConfig() {
 
 export function updateMeta() {
   dashboard.emit('updateModules', {
-    modules: modules.map((m) => ({
+    modules: player.modules.map((m) => ({
       name: m.name,
       description: m.description,
       enabled: m.enabled,

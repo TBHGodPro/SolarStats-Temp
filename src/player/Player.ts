@@ -1,12 +1,13 @@
 import {
-    LunarClientPlayer,
-    NotificationLevel
+  LunarClientPlayer,
+  NotificationLevel
 } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client } from 'minecraft-protocol';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
+import { config } from '..';
 import Command from '../Classes/Command';
 import CommandHandler from '../Classes/CommandHandler';
 import Listener from '../Classes/Listener';
@@ -21,11 +22,11 @@ import PlayerProxyHandler from './PlayerProxyHandler';
 export default class Player {
   public readonly crashedModules: PlayerModule[];
   public readonly listener: Listener;
-  public readonly modules: PlayerModule[];
   public readonly plugins: PluginInfo[];
   public readonly proxy: InstantConnectProxy;
-  public readonly commandHandler: CommandHandler;
   public readonly proxyHandler: PlayerProxyHandler;
+  public commandHandler: CommandHandler;
+  public modules: PlayerModule[];
 
   public client?: Client;
   public lastGameMode?: string;
@@ -37,9 +38,8 @@ export default class Player {
   public connectedPlayers: IPlayer[];
   public uuid?: string;
 
-  public constructor(proxy: InstantConnectProxy, modules: PlayerModule[]) {
+  public constructor(proxy: InstantConnectProxy) {
     this.crashedModules = [];
-    this.modules = modules;
     this.plugins = [];
     this.proxy = proxy;
 
@@ -71,10 +71,24 @@ export default class Player {
       ...commands
     );
 
-    this.modules.forEach((module) => module.setPlayer(this));
-
     (async () => {
       await loadPlugins(this);
+
+      const modules: PlayerModule[] = [];
+      readdirSync(join(__dirname, 'modules')).forEach((file) => {
+        try {
+          if (!file.endsWith('.js')) return;
+          const module = require(join(__dirname, 'modules', file)).default;
+
+          if (module instanceof PlayerModule) {
+            config.modules[module.configKey] ??= module.enabled || false;
+            modules.push(module.setPlayer(this));
+          } else Logger.warn(`Module in file ${file} is not a valid module.`);
+        } catch (error) {
+          Logger.error(`Couldn't load module ${file}`, error);
+        }
+      });
+      this.modules = modules;
     })();
   }
 
@@ -104,16 +118,6 @@ export default class Player {
       },
     });
     this.lcPlayer.connect();
-
-    this.modules.forEach((module) => {
-      try {
-        // @ts-ignore
-        this.listener.on(module.event, module.handler);
-        module.customCode();
-      } catch (error) {
-        this.onModuleCrash(module, error);
-      }
-    });
 
     this.listener.on('switch_server', async () => {
       this.teams = [];
@@ -223,7 +227,6 @@ export default class Player {
     this.sendMessage(
       `§cError while executing module ${module.name}!\n§cDisabling module...`
     );
-    this.listener.removeAllListeners(module.event);
     this.modules.splice(this.modules.indexOf(module), 1);
     Logger.error(`Error while executing module ${module.name}!`, error);
     this.crashedModules.push(module);

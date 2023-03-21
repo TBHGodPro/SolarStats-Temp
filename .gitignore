@@ -4,10 +4,11 @@ dist/
 config.json
 .vscode
 packetDump.json
-src/player/modules/stats.ts
 !dashboard/**
 **/.DS_STORE
 
 plugins/*
 
 !plugins/parkourTimer.js
+
+src/player/modules/test.ts

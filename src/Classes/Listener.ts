@@ -45,21 +45,6 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         }
       }
 
-      if (meta.name === 'set_slot') {
-        if (data.windowId === 0 && data.slot === 44) {
-          switch (data.item.blockId) {
-            case -1:
-              this.emit('arrow_slot_empty');
-              break;
-            case 262:
-              this.emit('arrow_slot_filled');
-              break;
-            default:
-              break;
-          }
-        }
-      }
-
       if (meta.name === 'named_entity_spawn') {
         this.emit('player_spawn', data.playerUUID, data.entityId);
       }
@@ -99,12 +84,6 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
           data.stay,
           data.fadeOut
         );
-      }
-    });
-
-    proxyHandler.on('fromClient', (data, meta, toClient, toServer) => {
-      if (meta.name === 'block_place') {
-        this.emit('place_block', data, toClient, toServer);
       }
     });
   }
