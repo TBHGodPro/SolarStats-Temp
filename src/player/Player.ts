@@ -168,14 +168,6 @@ export default class Player {
       .then((status) => {
         this.status = status;
         if (this.status.mode !== 'LOBBY') this.lastGameMode = this.status.mode;
-
-        this.modules.forEach((module) => {
-          try {
-            module.onLocationUpdate(this.status);
-          } catch (error) {
-            this.onModuleCrash(module, error);
-          }
-        });
       })
       .catch(() => {
         this.status = null;

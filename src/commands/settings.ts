@@ -29,46 +29,28 @@ command.onTriggered = async (chatCommand, args) => {
     await getConfigAsync();
     player.sendMessage('§aSolar Stats config successfully reloaded!');
     return;
+  } else if (action === 'stop') {
+    player.client.end('Stopping server...');
+    Logger.info('Stopping server...');
+    return process.exit(0);
   }
 
-  const inventory = new Inventory(
-    InventoryType.CONTAINER,
-    '§cSettings §8- §cSolar Stats',
-    45
-  );
+  const inventory = new Inventory(InventoryType.CONTAINER, '§cSettings §8- §cSolar§fStats', 45);
 
   const nametag = new Item(421);
   nametag.displayName = '§fAPI Key';
-  nametag.lore = [
-    '',
-    '§7The API key is used to retrieve',
-    '§7data from the Hypixel API',
-    '',
-    `§7Current: §o${config.apiKey ?? '§rnone'}`,
-  ];
+  nametag.lore = ['', '§7The API key is used to retrieve', '§7data from the Hypixel API', '', `§7Current: §o${config.apiKey ?? '§rnone'}`];
 
   const commandBlock = new Item(137);
   commandBlock.displayName = '§fServer actions';
-  commandBlock.lore = [
-    '',
-    '§7Manage Solar Stats',
-    '§7proxy server from here',
-    '',
-    '§7§nActions:',
-    '§7§lRight Click §r§7- Stop server',
-    '§7§lLeft Click §r§7- Restart server',
-  ];
+  commandBlock.lore = ['', '§7Manage Solar Stats', '§7proxy server from here', '', '§7§nActions:', '§7§lRight Click §r§7- Stop server', '§7§lLeft Click §r§7- Restart server'];
 
   const barrier = new Item(166);
   barrier.displayName = '§cClose';
 
   const paper = new Item(339);
   paper.displayName = '§fStatus';
-  paper.lore = [
-    '',
-    `§7Player: §a${player.client.username}`,
-    `§7Uptime: ${Math.floor(process.uptime())}s`,
-  ];
+  paper.lore = ['', `§7Player: §a${player.client.username}`, `§7Uptime: ${Math.floor(process.uptime())}s`];
 
   inventory.addItems([
     { item: nametag, position: 0 },
@@ -85,29 +67,15 @@ command.onTriggered = async (chatCommand, args) => {
     if (!Object.prototype.hasOwnProperty.call(module, 'settingItem')) return;
 
     const slot = Object.keys(inventory.items).length - 3;
-    module.settingItem.lore[
-      module.settingItem.lore.find((i) => i.startsWith('§7Current: '))
-        ? module.settingItem.lore.findIndex((i) => i.startsWith('§7Current: '))
-        : module.settingItem.lore.length
-    ] = `§7Current: §${
-      config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'
-    }`;
+    module.settingItem.lore[module.settingItem.lore.find(i => i.startsWith('§7Current: ')) ? module.settingItem.lore.findIndex(i => i.startsWith('§7Current: ')) : module.settingItem.lore.length] = `§7Current: §${config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'}`;
     inventory.addItem(module.settingItem, slot);
 
-    settingsMutator[slot] = async (event) => {
+    settingsMutator[slot] = async event => {
       event.cancel(player.client);
       const newConfig = { ...config.modules };
       newConfig[module.configKey] = !config.modules[module.configKey];
       await setValue('modules', newConfig);
-      module.settingItem.lore[
-        module.settingItem.lore.find((i) => i.startsWith('§7Current: '))
-          ? module.settingItem.lore.findIndex((i) =>
-              i.startsWith('§7Current: ')
-            )
-          : module.settingItem.lore.length
-      ] = `§7Current: §${
-        config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'
-      }`;
+      module.settingItem.lore[module.settingItem.lore.find(i => i.startsWith('§7Current: ')) ? module.settingItem.lore.findIndex(i => i.startsWith('§7Current: ')) : module.settingItem.lore.length] = `§7Current: §${config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'}`;
       inventory.setSlot(player.client, module.settingItem, slot);
       module.onConfigChange(config.modules[module.configKey]);
       module.toggleEnabled(config.modules[module.configKey]);
@@ -115,7 +83,7 @@ command.onTriggered = async (chatCommand, args) => {
     };
   }
 
-  inventory.on('click', (event) => {
+  inventory.on('click', event => {
     if (event.mode !== 0) {
       event.cancel(player.client);
       return;

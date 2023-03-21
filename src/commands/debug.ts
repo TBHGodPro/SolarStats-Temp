@@ -31,7 +31,7 @@ command.onTriggered = () => {
     }): §r${command.player.plugins.map((p) => p.name).join(', ')}`,
   ];
   command.player.sendMessage(
-    `\n§cSolar Stats - Debug info:\n\n${infos.join('\n')}`
+    `\n§cSolar§fStats - §6Debug info:\n\n§r${infos.join('\n')}`
   );
 };
 

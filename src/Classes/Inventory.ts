@@ -16,11 +16,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public incomingPacketHandler: (data, meta) => void;
   public outgoingPacketHandler: (data, meta, toClient, toServer) => void;
 
-  public constructor(
-    inventoryType: InventoryType,
-    title = 'Inventory',
-    slotCount = 27
-  ) {
+  public constructor(inventoryType: InventoryType, title = 'Inventory', slotCount = 27) {
     super();
     this.items = {};
     this.type = inventoryType;
@@ -109,12 +105,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
       if (meta.name === 'open_window') this.markAsClosed(proxyHandler);
     };
 
-    this.outgoingPacketHandler = (
-      data,
-      meta: PacketMeta,
-      toClient: Client,
-      toServer: Client
-    ) => {
+    this.outgoingPacketHandler = (data, meta: PacketMeta, toClient: Client, toServer: Client) => {
       if (meta.name === 'close_window')
         if (data.windowId === 50 && this.opened) {
           this.markAsClosed(proxyHandler);
@@ -122,12 +113,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
         }
 
       if (meta.name === 'window_click') {
-        if (
-          data.windowId === 50 &&
-          this.opened &&
-          data.slot < this.slotCount &&
-          data.slot !== -999
-        ) {
+        if (data.windowId === 50 && this.opened && data.slot < this.slotCount && data.slot !== -999) {
           this.emit('click', {
             button: data.mouseButton,
             mode: data.mode,

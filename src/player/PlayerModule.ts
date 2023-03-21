@@ -4,13 +4,6 @@ import { getConfig, setValueSync } from '../utils/config';
 import { PluginInfo } from '../utils/plugins';
 import Player from './Player';
 
-enum Events {
-  CustomCode = 'customCode',
-  ConfigChange = 'onConfigChange',
-  LocationUpdate = 'onLocationUpdate',
-  Disconnect = 'onDisconnect',
-}
-
 export default class PlayerModule {
   public readonly name: string;
   public readonly description: string;
@@ -18,7 +11,6 @@ export default class PlayerModule {
   public enabled: boolean;
 
   public onConfigChange: (enabled: boolean) => void;
-  public onLocationUpdate: (status: Status) => void;
   public onDisconnect: () => void;
 
   public settingItem: Item;
@@ -47,7 +39,6 @@ export default class PlayerModule {
     } else this.enabled = true;
 
     this.onConfigChange = () => {};
-    this.onLocationUpdate = () => {};
     this.onDisconnect = () => {};
 
     this.settingItem = settingItem;
@@ -61,13 +52,5 @@ export default class PlayerModule {
 
   public toggleEnabled(value?: boolean) {
     this.enabled = value != undefined ? value : !this.enabled;
-  }
-
-  public handle(
-    type: keyof typeof Events,
-    func: (...args: any) => void
-  ): PlayerModule {
-    this[Events[type]] = func;
-    return this;
   }
 }

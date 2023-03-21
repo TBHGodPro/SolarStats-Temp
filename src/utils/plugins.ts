@@ -13,7 +13,7 @@ import { updateMeta } from '../dashboard';
 import Player from '../player/Player';
 import PlayerModule from '../player/PlayerModule';
 import { InventoryType } from '../Types';
-import { readConfig, readConfigSync } from './config';
+import { getConfig, getConfigAsync } from './config';
 
 export async function getPlugins(folder = 'plugins'): Promise<string[]> {
   await stat(folder).catch(async () => await mkdir(folder));
@@ -82,8 +82,8 @@ export function loadPlugin(
       InventoryType,
       Item,
       Message: StringComponentBuilder,
-      getConfig: readConfig,
-      getConfigSync: readConfigSync,
+      getConfig: getConfigAsync,
+      getConfigSync: getConfig,
       parseNBTData: (
         data: Buffer | string,
         nbtType?: 'big' | 'little' | 'littleVarint'

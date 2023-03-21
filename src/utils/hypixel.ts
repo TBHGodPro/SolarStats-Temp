@@ -31,11 +31,8 @@ export async function fetchPlayerData(
     online: false,
   };
 
-  const player = hypixelClient.getPlayer(playerOrUuid);
-  const status = hypixelClient.getStatus(playerOrUuid);
-
   return new Promise<PlayerData>((resolve) => {
-    Promise.all([player, status])
+    Promise.all([hypixelClient.getPlayer(playerOrUuid), hypixelClient.getStatus(playerOrUuid)])
       .then(([player, status]) => {
         playerData.name = player.nickname;
         playerData.uuid = player.uuid;
