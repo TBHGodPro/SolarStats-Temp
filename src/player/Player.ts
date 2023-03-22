@@ -1,7 +1,4 @@
-import {
-  LunarClientPlayer,
-  NotificationLevel
-} from '@minecraft-js/lunarbukkitapi';
+import { LunarClientPlayer, NotificationLevel } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client } from 'minecraft-protocol';
 import { readdirSync } from 'node:fs';
@@ -38,6 +35,20 @@ export default class Player {
   public connectedPlayers: IPlayer[];
   public uuid?: string;
 
+  public get statusMessage(): string {
+    return this.status?.online && this.status?.mode && this.status.game?.name
+      ? `${this.status.mode.includes(this.status.game.name.toUpperCase()) ? '' : `${this.status.game.name} `}${
+          this.status.mode
+            ? `${this.status.mode
+                .split('_')
+                .filter(i => this.status.game.name.toUpperCase() != i)
+                .map(i => i[0].toUpperCase() + i.substring(1).toLowerCase())
+                .join(' ')}`
+            : ''
+        }${this.status.map ? ` on ${this.status.map}` : ''}`
+      : 'Offline';
+  }
+
   public constructor(proxy: InstantConnectProxy) {
     this.crashedModules = [];
     this.plugins = [];
@@ -51,15 +62,10 @@ export default class Player {
     this.proxyHandler.setMaxListeners(0);
 
     const commands: Command[] = [];
-    readdirSync(join(__dirname, '..', 'commands')).forEach((file) => {
+    readdirSync(join(__dirname, '..', 'commands')).forEach(file => {
       try {
         if (!file.endsWith('.js')) return;
-        const command = require(join(
-          __dirname,
-          '..',
-          'commands',
-          file
-        )).default;
+        const command = require(join(__dirname, '..', 'commands', file)).default;
 
         if (command instanceof Command) commands.push(command.setPlayer(this));
         else Logger.warn(`Command in file ${file} is not a command module.`);
@@ -67,15 +73,13 @@ export default class Player {
         Logger.error(`Couldn't load command ${file}`, error);
       }
     });
-    this.commandHandler = new CommandHandler(this.proxyHandler).registerCommand(
-      ...commands
-    );
+    this.commandHandler = new CommandHandler(this.proxyHandler).registerCommand(...commands);
 
     (async () => {
       await loadPlugins(this);
 
       const modules: PlayerModule[] = [];
-      readdirSync(join(__dirname, 'modules')).forEach((file) => {
+      readdirSync(join(__dirname, 'modules')).forEach(file => {
         try {
           if (!file.endsWith('.js')) return;
           const module = require(join(__dirname, 'modules', file)).default;
@@ -103,13 +107,13 @@ export default class Player {
     this.lcPlayer = new LunarClientPlayer({
       playerUUID: this.uuid,
       customHandling: {
-        registerPluginChannel: (channel) => {
+        registerPluginChannel: channel => {
           this.client.write('custom_payload', {
             channel: 'REGISTER',
             data: Buffer.from(channel + '\0'),
           });
         },
-        sendPacket: (buffer) => {
+        sendPacket: buffer => {
           this.client.write('custom_payload', {
             channel: this.lcPlayer.channel,
             data: buffer,
@@ -135,7 +139,7 @@ export default class Player {
     });
 
     this.listener.on('player_spawn', (uuid, entityId) => {
-      const p = this.connectedPlayers.find((v) => v.uuid === uuid);
+      const p = this.connectedPlayers.find(v => v.uuid === uuid);
       if (p) p.entityId = entityId;
     });
 
@@ -159,14 +163,14 @@ export default class Player {
 
     this.listener.removeAllListeners();
 
-    this.modules.forEach((module) => module.onDisconnect());
+    this.modules.forEach(module => module.onDisconnect());
 
     updateDashboardPlayer();
   }
 
   public async refreshPlayerLocation(): Promise<void> {
     await fetchPlayerLocation(this.uuid)
-      .then((status) => {
+      .then(status => {
         this.status = status;
         if (this.status.mode !== 'LOBBY') this.lastGameMode = this.status.mode;
       })
@@ -181,14 +185,10 @@ export default class Player {
     if (!this.status) return;
     if (!this.status.mode) return;
     if (this.status.mode === 'LOBBY') return;
-    this.lcPlayer.sendNotification(
-      'Dodging game...',
-      2500,
-      NotificationLevel.INFO
-    );
+    this.lcPlayer.sendNotification('Dodging game...', 2500, NotificationLevel.INFO);
     const command = `/play ${this.status.mode.toLocaleLowerCase()}`;
     this.executeCommand('/lobby blitz');
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
     this.executeCommand(command);
 
     let switched = false;
@@ -217,9 +217,7 @@ export default class Player {
   }
 
   private onModuleCrash(module: PlayerModule, error): void {
-    this.sendMessage(
-      `§cError while executing module ${module.name}!\n§cDisabling module...`
-    );
+    this.sendMessage(`§cError while executing module ${module.name}!\n§cDisabling module...`);
     this.modules.splice(this.modules.indexOf(module), 1);
     Logger.error(`Error while executing module ${module.name}!`, error);
     this.crashedModules.push(module);

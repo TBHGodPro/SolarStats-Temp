@@ -33,22 +33,16 @@ export class DashboardManager {
   constructor(server: WebSocketServer) {
     this.server = server;
 
-    this.server.on('error', (err) => logger.error('[Server Error]', err));
+    this.server.on('error', err => logger.error('[Server Error]', err));
 
-    this.server.on('connection', (socket, request) =>
-      this.initSocket(socket, request)
-    );
+    this.server.on('connection', (socket, request) => this.initSocket(socket, request));
 
     (async () => {
       const config = await getConfigAsync();
 
       if (isNaN(config.dashboard.port)) return logger.error('Invalid Port');
 
-      this.server.on('listening', () =>
-        logger.info(
-          `Dashboard WebSocket Online at port ${config.dashboard.port}`
-        )
-      );
+      this.server.on('listening', () => logger.info(`Dashboard WebSocket Online at port ${config.dashboard.port}`));
 
       httpServer.listen(config.dashboard.port);
 
@@ -57,13 +51,11 @@ export class DashboardManager {
           const dist = join(process.cwd(), 'dashboard/dist');
           const product = join(
             dist,
-            (await readdir(dist)).find(
-              (i) => !i.includes('.') && i !== 'bundled'
-            )
+            (await readdir(dist)).find(i => !i.includes('.') && i !== 'bundled')
           );
           const file = join(
             product,
-            (await readdir(product)).find((i) => !i.startsWith('.'))
+            (await readdir(product)).find(i => !i.startsWith('.'))
           );
 
           let command;
@@ -75,9 +67,7 @@ export class DashboardManager {
               command = `start "" "${file}"`;
               break;
             default:
-              return logger.error(
-                `Dashboard is not allowed on this operating system (${process.platform})`
-              );
+              return logger.error(`Dashboard is not allowed on this operating system (${process.platform})`);
           }
 
           if (!this.socket)
@@ -96,9 +86,9 @@ export class DashboardManager {
     if (this.socket) return socket.close(4000);
     this.socket = socket;
 
-    this.socket.on('error', (err) => logger.error('[WebSocket Error]', err));
+    this.socket.on('error', err => logger.error('[WebSocket Error]', err));
     this.socket.on('close', () => (this.socket = null));
-    this.socket.on('message', async (raw) => {
+    this.socket.on('message', async raw => {
       let msg: {
         op: keyof IncomingDashboardEvents;
         data: any;
@@ -119,8 +109,8 @@ export class DashboardManager {
           await getConfigAsync();
           break;
         case 'toggleModule':
-          if (player.modules.find((i) => i.name == data.name)) {
-            const module = player.modules.find((i) => i.name == data.name);
+          if (player.modules.find(i => i.name == data.name)) {
+            const module = player.modules.find(i => i.name == data.name);
             const newConfig = { ...config.modules };
             newConfig[module.configKey] = data.enabled;
             await setValue('modules', newConfig);
@@ -135,13 +125,13 @@ export class DashboardManager {
       startedAt: Date.now() - Math.floor(process.uptime() * 1000),
       config: await getConfigAsync(),
       plugins: player.plugins,
-      modules: player.modules.map((m) => ({
+      modules: player.modules.map(m => ({
         name: m.name,
         description: m.description,
         enabled: m.enabled,
         createdBy: m.createdBy,
       })),
-      crashedModules: player.crashedModules.map((m) => ({
+      crashedModules: player.crashedModules.map(m => ({
         name: m.name,
         description: m.description,
         enabled: m.enabled,
@@ -151,17 +141,14 @@ export class DashboardManager {
     });
   }
 
-  public emit<T extends keyof OutgoingDashboardEvents>(
-    op: T,
-    data: OutgoingDashboardEvents[T]
-  ): Promise<void> {
+  public emit<T extends keyof OutgoingDashboardEvents>(op: T, data: OutgoingDashboardEvents[T]): Promise<void> {
     return new Promise((res, rej) => {
       this.socket?.send(
         JSON.stringify({
           op,
           data,
         }),
-        (err) => (err ? rej(err) : res())
+        err => (err ? rej(err) : res())
       );
     });
   }
@@ -220,13 +207,13 @@ export async function updateConfig() {
 
 export function updateMeta() {
   dashboard.emit('updateModules', {
-    modules: player.modules.map((m) => ({
+    modules: player.modules.map(m => ({
       name: m.name,
       description: m.description,
       enabled: m.enabled,
       createdBy: m.createdBy,
     })),
-    crashedModules: player.crashedModules.map((m) => ({
+    crashedModules: player.crashedModules.map(m => ({
       name: m.name,
       description: m.description,
       enabled: m.enabled,
@@ -256,6 +243,7 @@ export function getDashboardPlayer() {
               map: player.status.map,
             }
           : null,
+        statusMessage: player.statusMessage,
       }
     : null;
 }
@@ -271,6 +259,7 @@ export interface DashboardPlayer {
     mode?: string;
     map?: string;
   };
+  statusMessage: string;
 }
 
 export interface DashboardModule {

@@ -134,29 +134,7 @@
           "
         >
           {{
-            $store.state.data.player.status.mode.includes(
-              $store.state.data.player.status.game.name.toUpperCase()
-            )
-              ? ''
-              : `${$store.state.data.player.status.game.name} `
-          }}
-          {{
-            $store.state.data.player.status.mode
-              ? `${$store.state.data.player.status.mode
-                  .split('_')
-                  .filter(
-                    (i) =>
-                      $store.state.data.player.status.game.name.toUpperCase() !=
-                      i
-                  )
-                  .map((i) => i[0].toUpperCase() + i.substring(1).toLowerCase())
-                  .join(' ')}`
-              : ''
-          }}
-          {{
-            $store.state.data.player.status.map
-              ? ` on ${$store.state.data.player.status.map}`
-              : ''
+            $store.state.data.player.statusMessage
           }}
         </h4>
       </div>
