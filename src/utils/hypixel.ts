@@ -32,7 +32,10 @@ export async function fetchPlayerData(
   };
 
   return new Promise<PlayerData>((resolve) => {
-    Promise.all([hypixelClient.getPlayer(playerOrUuid), hypixelClient.getStatus(playerOrUuid)])
+    Promise.all([
+      hypixelClient.getPlayer(playerOrUuid),
+      hypixelClient.getStatus(playerOrUuid),
+    ])
       .then(([player, status]) => {
         playerData.name = player.nickname;
         playerData.uuid = player.uuid;
@@ -58,6 +61,8 @@ export async function fetchPlayerLocation(uuid: string): Promise<Status> {
     hypixelClient
       .getStatus(uuid, { noCacheCheck: true, noCaching: true })
       .then((status) => {
+        if (status?.mode)
+          status.mode = status.mode.replace(/BED WARS/g, 'BEDWARS');
         resolve(status);
       })
       .catch((reason) => {

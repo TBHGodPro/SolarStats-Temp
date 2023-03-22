@@ -1,4 +1,3 @@
-import { Status } from 'hypixel-api-reborn';
 import Item from '../Classes/Item';
 import { getConfig, setValueSync } from '../utils/config';
 import { PluginInfo } from '../utils/plugins';

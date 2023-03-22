@@ -1,6 +1,5 @@
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
-import { player } from '..';
 import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import { ListenerEvents } from '../Types';
 import Logger from './Logger';
@@ -8,9 +7,9 @@ import Logger from './Logger';
 export default class Listener extends (EventEmitter as new () => TypedEmitter<ListenerEvents>) {
   public constructor(proxyHandler: PlayerProxyHandler) {
     super();
-    proxyHandler.on('start', (toClient, toServer) => {
-      if (player.online) this.emit('switch_server', toServer);
-    });
+    proxyHandler.on('start', (toClient, toServer) =>
+      this.emit('switch_server', toServer)
+    );
 
     proxyHandler.on('fromServer', async (data, meta) => {
       // Chat packet

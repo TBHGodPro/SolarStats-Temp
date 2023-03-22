@@ -109,11 +109,25 @@ export const configSchema = {
       },
       type: 'object',
     },
+    dashboard: {
+      properties: {
+        enabled: {
+          type: 'boolean',
+        },
+        port: {
+          type: 'number',
+        },
+      },
+      type: 'object',
+    },
     modules: {
       additionalProperties: {
         type: 'boolean',
       },
       type: 'object',
+    },
+    proxyPort: {
+      type: 'number',
     },
     server: {
       properties: {

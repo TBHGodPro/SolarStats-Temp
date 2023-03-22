@@ -139,6 +139,7 @@ export default class Player {
       if (p) p.entityId = entityId;
     });
 
+    this.refreshPlayerLocation();
     // In case the user reconnects to the server and is directly in a game
     setTimeout(async () => {
       await this.refreshPlayerLocation();

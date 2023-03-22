@@ -228,3 +228,9 @@ export function reloadEmotes() {
     ...config?.customEmotes,
   };
 }
+
+export interface Location {
+  x: number;
+  y: number;
+  z: number;
+}

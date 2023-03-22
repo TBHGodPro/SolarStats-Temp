@@ -6,6 +6,7 @@ import * as https from 'node:https';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
+import BossBar from './Classes/BossBar';
 import Logger from './Classes/Logger';
 import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
@@ -135,3 +136,27 @@ if (config.statistics && !process.argv.includes('--noTracking'))
     .catch((error) =>
       Logger.error('An error occurred while sending statistics', error)
     );
+
+export const bossBar = new BossBar('§cSolar§fStats', 300);
+bossBar.render();
+
+export function updateMainBossBar() {
+  if (player.status?.game?.name && player.status?.mode) {
+    const name = `§cSolar§fStats | ${
+      player.status.mode.includes(player.status.game.name.toUpperCase())
+        ? ''
+        : `${player.status.game.name} `
+    }${
+      player.status.mode
+        ? `${player.status.mode
+            .split('_')
+            .filter((i) => player.status.game.name.toUpperCase() != i)
+            .map((i) => i[0].toUpperCase() + i.substring(1).toLowerCase())
+            .join(' ')}`
+        : ''
+    }${player.status.map ? ` on ${player.status.map}` : ''}`;
+
+    if (bossBar.text != name) bossBar.setText(name);
+  }
+}
+setInterval(() => updateMainBossBar(), 500);
