@@ -11,8 +11,8 @@ export default class CommandHandler {
     this.commands = [];
     this.commandsList = [];
 
-    proxyHandler.on('fromClient', (data, meta, toClient, toServer) => {
-      if (meta.name === 'chat') {
+    proxyHandler.on('fromClient', ({ data, name }, toClient, toServer) => {
+      if (name === 'chat') {
         const message: string = data.message.toLowerCase().split(' ')[0];
         if (!this.commandsList.includes(message)) {
           const origMessage = data.message;
@@ -24,7 +24,7 @@ export default class CommandHandler {
 
           if (newMessage === origMessage) return true;
           else {
-            toServer.write(meta.name, {
+            toServer.write(name, {
               ...data,
               message: newMessage,
             });

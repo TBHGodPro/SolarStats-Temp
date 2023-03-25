@@ -27,10 +27,10 @@ command.onTriggered = (chatCommand, args) => {
     true
   ) as string[];
 
-  const callback = (data: unknown, packetMeta: PacketMeta) => {
-    if (!ignoredPackets.includes(packetMeta.name))
+  const callback = ({ data, name }) => {
+    if (!ignoredPackets.includes(name))
       packets.push({
-        name: packetMeta.name,
+        name: name,
         timestamp: Date.now().toString(),
         packet: data,
       });

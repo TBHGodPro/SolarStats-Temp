@@ -31,9 +31,9 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
       this.emit('switch_server', toServer)
     );
 
-    proxyHandler.on('fromServer', async (data, meta) => {
+    proxyHandler.on('fromServer', async ({ name, data }) => {
       // Chat packet
-      if (meta.name === 'chat') {
+      if (name === 'chat') {
         try {
           // Server Full
           // Triggered when a message like "has joined (X/X)!"
@@ -64,7 +64,7 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         }
       }
 
-      if (meta.name === 'named_entity_spawn') {
+      if (name === 'named_entity_spawn') {
         this.emit(
           'player_spawn',
           data.playerUUID,
@@ -73,11 +73,12 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         );
       }
 
-      if (meta.name === 'player_info' && data.action === 0) {
-        this.emit('player_join', data.data[0].UUID, data.data[0].name);
+      if (name === 'player_info' && data.action === 0) {
+        for (const player of data.data.filter((i) => i.UUID && i.name))
+          this.emit('player_join', player.UUID, player.name);
       }
 
-      if (meta.name === 'scoreboard_team') {
+      if (name === 'scoreboard_team') {
         switch (data.mode) {
           case 0:
             this.emit('team_create', data.team);
@@ -95,11 +96,11 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         }
       }
 
-      if (meta.name === 'chat' && data.position == 2) {
+      if (name === 'chat' && data.position == 2) {
         this.emit('action_bar', JSON.parse(data.message));
       }
 
-      if (meta.name === 'title') {
+      if (name === 'title' && data.action === 2) {
         this.emit(
           'title',
           data.action,
@@ -110,13 +111,13 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         );
       }
 
-      if (meta.name === 'entity_destroy')
+      if (name === 'entity_destroy')
         for (const id of data.entityIds) this.emit('player_leave', id);
 
-      if (meta.name === 'entity_teleport') {
+      if (name === 'entity_teleport') {
         this.emit('entity_teleport', data.entityId, parseLocation(data));
       }
-      if (meta.name === 'rel_entity_move' || meta.name === 'entity_move_look') {
+      if (name === 'rel_entity_move' || name === 'entity_move_look') {
         this.emit(
           'entity_move',
           data.entityId,
@@ -128,7 +129,7 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         );
       }
 
-      if (meta.name === 'entity_velocity') {
+      if (name === 'entity_velocity') {
         this.emit(
           'entity_velocity',
           data.entityId,
@@ -140,7 +141,7 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         );
       }
 
-      if (meta.name === 'position') {
+      if (name === 'position') {
         this.emit('client_move', {
           x: data.x,
           y: data.y,
@@ -151,17 +152,15 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
       }
     });
 
-    proxyHandler.on('fromClient', (data, meta) => {
-      if (meta.name === 'position' || meta.name === 'position_look') {
+    proxyHandler.on('fromClient', ({ name, data }) => {
+      if (name === 'position' || name === 'position_look') {
         this.emit('client_move', {
           x: data.x,
           y: data.y,
           z: data.z,
         });
-        if (data.yaw && data.pitch)
-          this.emit('client_face', parseDirection(data));
       }
-      if (meta.name === 'look') {
+      if (name === 'look' || name === 'position_look') {
         this.emit('client_face', parseDirection(data));
       }
     });

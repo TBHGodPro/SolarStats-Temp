@@ -499,7 +499,7 @@ export type PacketsPlayToClient = {
     team: string;
   } & (
     | {
-        mode: number;
+        mode: 1;
       }
     | {
         mode: 2;
@@ -568,6 +568,7 @@ export type PacketsPlayToClient = {
       }
     | {
         action: 2;
+        text: string;
         fadeIn: number;
         stay: number;
         fadeOut: number;

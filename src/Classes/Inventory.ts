@@ -13,8 +13,8 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public slotCount: number;
   public opened: boolean;
 
-  public incomingPacketHandler: (data, meta) => void;
-  public outgoingPacketHandler: (data, meta, toClient, toServer) => void;
+  public incomingPacketHandler: (...args: any[]) => void;
+  public outgoingPacketHandler: (...args: any[]) => void;
 
   public constructor(
     inventoryType: InventoryType,
@@ -104,23 +104,22 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   }
 
   private setupPacketHandlers(proxyHandler: PlayerProxyHandler): void {
-    this.incomingPacketHandler = (data, meta) => {
-      if (meta.name === 'open_window') this.markAsClosed(proxyHandler);
+    this.incomingPacketHandler = ({ name }) => {
+      if (name === 'open_window') this.markAsClosed(proxyHandler);
     };
 
     this.outgoingPacketHandler = (
-      data,
-      meta: PacketMeta,
+      { data, name },
       toClient: Client,
       toServer: Client
     ) => {
-      if (meta.name === 'close_window')
+      if (name === 'close_window')
         if (data.windowId === 50 && this.opened) {
           this.markAsClosed(proxyHandler);
           return false;
         }
 
-      if (meta.name === 'window_click') {
+      if (name === 'window_click') {
         if (
           data.windowId === 50 &&
           this.opened &&

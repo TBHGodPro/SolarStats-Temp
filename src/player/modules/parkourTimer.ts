@@ -5,9 +5,19 @@ import PlayerModule from '../PlayerModule';
 
 const settingItem = new Item(147);
 settingItem.displayName = '§6Parkour Timer';
-settingItem.lore = ['', '§7An automatic live parkour timer', '', `§7Current: §${config?.modules.parkourTimer ? 'aEnabled' : 'cDisabled'}`];
+settingItem.lore = [
+  '',
+  '§7An automatic live parkour timer',
+  '',
+  `§7Current: §${config?.modules.parkourTimer ? 'aEnabled' : 'cDisabled'}`,
+];
 
-const playerModule = new PlayerModule('ParkourTimer', 'An automatic live parkour timer', settingItem, 'parkourTimer');
+const playerModule = new PlayerModule(
+  'ParkourTimer',
+  'An automatic live parkour timer',
+  settingItem,
+  'parkourTimer'
+);
 
 const command = new Command(
   'reset', // Command name
@@ -28,23 +38,39 @@ command.onTriggered = () => {
 
 player.commandHandler.registerCommand(command.setPlayer(player));
 
-player.proxyHandler.on('fromServer', (data, meta) => {
-  if (meta.name != 'chat' || data.position != 0) return;
-  let { message } = data;
+player.proxyHandler.on('fromServer', ({ data, name }) => {
+  if (name != 'chat' || data.position != 0) return;
+  let {
+    message,
+  }: {
+    message: any;
+  } = data;
   message = JSON.parse(message);
   message.extra ??= [];
-  message = [message.text, ...message.extra.map(i => i.text)].join('');
-  if (message.includes('Parkour challenge started!') || message.includes('Reset your timer to 00:00!')) {
+  message = [message.text, ...message.extra.map((i) => i.text)].join('');
+  if (
+    message.includes('Parkour challenge started!') ||
+    message.includes('Reset your timer to 00:00!')
+  ) {
     timeStarted = Date.now();
     timeStartedCheckpoint = timeStarted;
     checkpoint = 1;
   }
-  if (message.includes('cancelled') || message.includes('failed') || message.includes('completed') || message.includes('record')) {
+  if (
+    message.includes('cancelled') ||
+    message.includes('failed') ||
+    message.includes('completed') ||
+    message.includes('record')
+  ) {
     timeStarted = null;
     timeStartedCheckpoint = null;
     checkpoint = null;
   }
-  if (message.match(/You reached Checkpoint #[0-9]+ after [0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]/)) {
+  if (
+    message.match(
+      /You reached Checkpoint #[0-9]+ after [0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]/
+    )
+  ) {
     timeStartedCheckpoint = Date.now();
     const res = message.match(/Checkpoint #[0-9]+/);
     checkpoint = parseInt(res[0].substring(res.index)) + 1;
@@ -69,13 +95,20 @@ function parseTime(ms) {
 }
 
 setInterval(() => {
-  if (playerModule.enabled && timeStarted && timeStartedCheckpoint && checkpoint) {
+  if (
+    playerModule.enabled &&
+    timeStarted &&
+    timeStartedCheckpoint &&
+    checkpoint
+  ) {
     const time = Date.now() - timeStarted;
     const checkpointTime = Date.now() - timeStartedCheckpoint;
 
     player.client?.write('chat', {
       message: JSON.stringify({
-        text: `§2Total§f: ${parseTime(time)} §f| §2Checkpoint #§6${checkpoint}§f: ${parseTime(checkpointTime)}`,
+        text: `§2Total§f: ${parseTime(
+          time
+        )} §f| §2Checkpoint #§6${checkpoint}§f: ${parseTime(checkpointTime)}`,
       }),
       position: 2,
     });

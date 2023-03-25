@@ -21,11 +21,11 @@ const playerModule = new PlayerModule(
   'heightLimitDelayFix'
 );
 
-player.proxyHandler.on('fromClient', (packet, meta, toClient) => {
+player.proxyHandler.on('fromClient', ({ data: packet, name }, toClient) => {
   if (
-    meta.name !== 'block_place' ||
+    name !== 'block_place' ||
     !playerModule.enabled ||
-    !player.isInGameMode("DUELS_BRIDGE") ||
+    !player.isInGameMode('DUELS_BRIDGE') ||
     packet.heldItem.blockId !== 159 ||
     !(
       (packet.direction === 1 && packet.location.y >= 99) ||

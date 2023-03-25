@@ -19,9 +19,9 @@ const playerModule = new PlayerModule(
   'lunarCooldowns'
 );
 
-player.proxyHandler.on('fromServer', (data, meta) => {
+player.proxyHandler.on('fromServer', ({ data, name }) => {
   if (
-    meta.name !== 'set_slot' ||
+    name !== 'set_slot' ||
     data.windowId !== 0 ||
     data.slot !== 44 ||
     !playerModule.enabled ||

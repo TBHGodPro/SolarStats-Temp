@@ -1,26 +1,38 @@
 import {
   Client as PlayerClient,
   PacketMeta,
-  ServerClient
+  ServerClient,
 } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import * as structuredClone from 'structured-clone';
 import TypedEmitter from 'typed-emitter';
+import { PacketsPlayToClient, PacketsPlayToServer } from '../PacketTypings';
 import Player from './Player';
+
+type PacketTypeFromServer = {
+  [T in keyof PacketsPlayToClient]: {
+    name: T;
+    data: PacketsPlayToClient[T];
+  };
+};
+type PacketTypeFromClient = {
+  [T in keyof PacketsPlayToServer]: {
+    name: T;
+    data: PacketsPlayToServer[T];
+  };
+};
 
 export type PlayerProxyHandlerEvents = {
   start: (toClient: ServerClient, toServer: PlayerClient) => void;
   end: (username: string) => void;
 
   fromServer: (
-    data: any,
-    meta: PacketMeta,
+    data: PacketTypeFromServer[keyof PacketTypeFromServer],
     toClient: ServerClient,
     toServer: PlayerClient
   ) => void | Promise<void> | boolean;
   fromClient: (
-    data: any,
-    meta: PacketMeta,
+    data: PacketTypeFromClient[keyof PacketTypeFromClient],
     toClient: ServerClient,
     toServer: PlayerClient
   ) => void | Promise<void> | boolean;
@@ -42,7 +54,14 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
 
       // TODO: Fix async support, caused lag spikes even on empty async functions
       for (const func of listeners) {
-        const result = func(data, meta, toClient, toServer);
+        const result = func(
+          {
+            data,
+            name: meta.name,
+          },
+          toClient,
+          toServer
+        );
         if (result === false) send = false;
       }
 
@@ -61,7 +80,14 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
 
       // TODO: Fix async support, caused lag spikes even on empty async functions
       for (const func of listeners) {
-        const result = func(data, meta, toClient, toServer);
+        const result = func(
+          {
+            data,
+            name: meta.name,
+          },
+          toClient,
+          toServer
+        );
         if (result === false) send = false;
       }
 

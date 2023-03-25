@@ -124,9 +124,9 @@ export default class BossBar {
       this.spawnWithVerify();
     });
 
-    player.proxyHandler.on('fromServer', (data, meta) => {
+    player.proxyHandler.on('fromServer', ({ data, name }) => {
       if (
-        meta.name === 'spawn_entity_living' &&
+        name === 'spawn_entity_living' &&
         data.type === 64 &&
         data.metadata?.find(
           (m) => m.type === 4 && m.key === 2 && typeof m.value === 'string'
@@ -143,21 +143,21 @@ export default class BossBar {
         this.realBossBar = data;
         return !this.spawned;
       } else if (
-        meta.name === 'entity_metadata' &&
+        name === 'entity_metadata' &&
         this.realBossBar &&
         data.entityId === this.realBossBar.entityId
       ) {
         this.realBossBar.metadata = data.metadata;
         return !this.spawned;
       } else if (
-        meta.name === 'entity_destroy' &&
+        name === 'entity_destroy' &&
         this.realBossBar &&
         data.entityIds.includes(this.realBossBar.entityId)
       ) {
         this.realBossBar = null;
         return !this.spawned;
       } else if (
-        meta.name === 'entity_teleport' &&
+        name === 'entity_teleport' &&
         this.realBossBar &&
         data.entityId === this.realBossBar.entityId
       ) {
