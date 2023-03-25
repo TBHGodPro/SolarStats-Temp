@@ -1,6 +1,6 @@
 import { Waypoint } from '@minecraft-js/lunarbukkitapi';
 import { Player as HypixelPlayer } from 'hypixel-api-reborn';
-import { Client } from 'minecraft-protocol';
+import { Client, ServerClient } from 'minecraft-protocol';
 import { config } from '.';
 
 export interface Config {
@@ -57,8 +57,12 @@ export interface ListenerEvents {
   team_delete: (name: string) => void;
   team_edit: (data: unknown) => void;
   team_player_add: (name: string, players: string[]) => void;
-  player_spawn: (uuid: string, entityId: number) => void;
   player_join: (uuid: string, username: string) => void;
+  player_spawn: (uuid: string, entityId: number, location: Location) => void;
+  player_leave: (entityId: number) => void;
+  entity_teleport: (entityId: number, location: Location) => void;
+  entity_move: (entityId: number, difference: Location) => void;
+  entity_velocity: (entityId: number, velocity: Location) => void;
   title: (
     action: number,
     text?: string,
@@ -67,6 +71,8 @@ export interface ListenerEvents {
     fadeOut?: number
   ) => void;
   action_bar: (message: object) => void;
+  client_move: (location: Location) => void;
+  client_face: (direction: Direction) => void;
 }
 
 export interface BlockPlacePacket {
@@ -142,35 +148,7 @@ export interface WindowClickEvent {
   mode: number;
   raw: unknown;
   toServer: Client;
-  cancel: (client: Client) => void;
-}
-
-export interface Slot {
-  blockId: number;
-  itemCount: number;
-  itemDamage?: number;
-  nbtData?: {
-    type: 'compound';
-    name: '';
-    value: {
-      display?: {
-        type: 'compound';
-        value: {
-          Lore?: {
-            type: 'list';
-            value: {
-              type: 'string';
-              value: string[];
-            };
-          };
-          Name?: {
-            type: 'string';
-            value: string;
-          };
-        };
-      };
-    };
-  };
+  cancel: (client: ServerClient) => void;
 }
 
 export interface Team {
@@ -182,6 +160,8 @@ export interface IPlayer {
   name: string;
   uuid: string;
   entityId?: number;
+  location?: Location;
+  velocity?: Location;
 }
 
 export const baseEmotes = {
@@ -233,4 +213,9 @@ export interface Location {
   x: number;
   y: number;
   z: number;
+}
+
+export interface Direction {
+  yaw: number;
+  pitch: number;
 }

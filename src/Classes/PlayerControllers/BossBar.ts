@@ -1,5 +1,43 @@
-import { player } from '..';
-import { Location } from '../Types';
+import { player } from '../..';
+import { EntityMetadata } from '../../PacketTypings';
+import { Direction, Location } from '../../Types';
+
+// Y: 33 blocks in the direction facing (negative pitch is up, positive is down)
+// X and Z: 32 blocks in the direction facing
+
+function calculateBlock(pos: Location, dir: Direction): Location {
+  // Calculate X
+
+  // -180 to 180
+  // We want -90 to 90 (which is actually 90 to 270)
+  let yaw = dir.yaw - 180;
+
+  // -90 to 90
+  if (yaw < -90) yaw += (Math.abs(yaw) - 90) * 2;
+  if (yaw > 90) yaw -= (yaw - 90) * 2;
+
+  const x = yaw / 2.8125;
+
+  // Calculate Z
+
+  // 0 to 360
+  // We want 0 and 360 (as the same) to 180
+  yaw = dir.yaw;
+
+  // 0 to 180
+  if (yaw > 180) yaw -= (yaw - 180) * 2;
+
+  // -90 to 90
+  yaw = yaw - 90;
+
+  const z = yaw / 2.8125;
+
+  return {
+    x: (pos.x + x) * 32,
+    y: (pos.y - dir.pitch / 2.7272727272) * 32,
+    z: (pos.z - z) * 32,
+  };
+}
 
 export default class BossBar {
   public ID = -1234;
@@ -8,25 +46,22 @@ export default class BossBar {
   public spawned: boolean;
 
   public realBossBar: any = null;
+  public realLocation: Location;
 
-  public location: Location = {
-    x: -624,
-    y: 3104,
-    z: 16,
-  };
+  public get location(): Location {
+    return (
+      null /*this.realLocation*/ ??
+      (player.location && player.direction
+        ? calculateBlock(player.location, player.direction)
+        : {
+            x: 0,
+            y: 0,
+            z: 0,
+          })
+    );
+  }
 
-  public get metadata(): (
-    | {
-        type: number;
-        key: number;
-        value: number;
-      }
-    | {
-        type: 4;
-        key: 2;
-        value: string;
-      }
-  )[] {
+  public get metadata(): EntityMetadata {
     return [
       {
         type: 0,
@@ -85,11 +120,7 @@ export default class BossBar {
     this.health = health;
 
     player.listener.on('switch_server', () => {
-      this.location = {
-        x: -624,
-        y: 3104,
-        z: 16,
-      };
+      // this.realLocation = null;
       this.spawnWithVerify();
     });
 
@@ -104,7 +135,7 @@ export default class BossBar {
           (m) => m.type === 3 && m.key === 6 && typeof m.value === 'number'
         )
       ) {
-        this.location = {
+        this.realLocation = {
           x: data.x,
           y: data.y,
           z: data.z,
@@ -130,13 +161,21 @@ export default class BossBar {
         this.realBossBar &&
         data.entityId === this.realBossBar.entityId
       ) {
-        this.location = {
+        this.realLocation = {
           x: data.x,
           y: data.y,
           z: data.z,
         };
+        this.realBossBar = {
+          ...this.realBossBar,
+          ...this.realLocation,
+        };
+        this.updatePosition();
+        return !this.spawned;
       }
     });
+
+    setInterval(() => this.updatePosition(), 100);
   }
 
   private spawnWithVerify() {
@@ -158,9 +197,22 @@ export default class BossBar {
   public render(skipSpawnedCheck = false) {
     if (!skipSpawnedCheck && !this.spawned) this.spawn();
 
+    this.updatePosition(skipSpawnedCheck);
     player.client?.write('entity_metadata', {
       entityId: this.ID,
       metadata: this.metadata,
+    });
+  }
+
+  public updatePosition(skipSpawnedCheck = false) {
+    if (!skipSpawnedCheck && !this.spawned) return;
+
+    player.client?.write('entity_teleport', {
+      entityId: this.ID,
+      ...this.location,
+      yaw: 0,
+      pitch: 0,
+      onGround: false,
     });
   }
 

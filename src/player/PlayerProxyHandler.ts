@@ -46,7 +46,7 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
         if (result === false) send = false;
       }
 
-      if (send) toClient.write(meta.name, msg);
+      if (send) toClient.write(meta.name as any, msg);
     });
 
     this.player.proxy.on('outgoing', async (data, meta, toClient, toServer) => {
@@ -65,7 +65,7 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
         if (result === false) send = false;
       }
 
-      if (send) toServer.write(meta.name, msg);
+      if (send) toServer.write(meta.name as any, msg);
     });
 
     this.player.proxy.on('start', (...args) => this.emit('start', ...args));

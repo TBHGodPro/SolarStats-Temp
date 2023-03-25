@@ -1,4 +1,4 @@
-import { Slot } from '../Types';
+import { Slot } from '../PacketTypings';
 
 export default class Item {
   public slotRepresentation: Slot;

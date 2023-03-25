@@ -1,8 +1,28 @@
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
 import PlayerProxyHandler from '../player/PlayerProxyHandler';
-import { ListenerEvents } from '../Types';
+import { Direction, ListenerEvents, Location } from '../Types';
 import Logger from './Logger';
+
+export function parseLocation(data: Location) {
+  return {
+    x: data.x / 32,
+    y: data.y / 32,
+    z: data.z / 32,
+  };
+}
+export function parseDirection(data: Direction) {
+  while (data.pitch > 90) data.pitch -= 360;
+  while (data.pitch < -90) data.pitch += 360;
+
+  while (data.yaw > 360) data.yaw -= 360;
+  while (data.yaw < 0) data.yaw += 360;
+
+  return {
+    yaw: data.yaw,
+    pitch: data.pitch,
+  };
+}
 
 export default class Listener extends (EventEmitter as new () => TypedEmitter<ListenerEvents>) {
   public constructor(proxyHandler: PlayerProxyHandler) {
@@ -45,7 +65,12 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
       }
 
       if (meta.name === 'named_entity_spawn') {
-        this.emit('player_spawn', data.playerUUID, data.entityId);
+        this.emit(
+          'player_spawn',
+          data.playerUUID,
+          data.entityId,
+          parseLocation(data)
+        );
       }
 
       if (meta.name === 'player_info' && data.action === 0) {
@@ -83,6 +108,61 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
           data.stay,
           data.fadeOut
         );
+      }
+
+      if (meta.name === 'entity_destroy')
+        for (const id of data.entityIds) this.emit('player_leave', id);
+
+      if (meta.name === 'entity_teleport') {
+        this.emit('entity_teleport', data.entityId, parseLocation(data));
+      }
+      if (meta.name === 'rel_entity_move' || meta.name === 'entity_move_look') {
+        this.emit(
+          'entity_move',
+          data.entityId,
+          parseLocation({
+            x: data.dX,
+            y: data.dY,
+            z: data.dZ,
+          })
+        );
+      }
+
+      if (meta.name === 'entity_velocity') {
+        this.emit(
+          'entity_velocity',
+          data.entityId,
+          parseLocation({
+            x: data.velocityX,
+            y: data.velocityY,
+            z: data.velocityZ,
+          })
+        );
+      }
+
+      if (meta.name === 'position') {
+        this.emit('client_move', {
+          x: data.x,
+          y: data.y,
+          z: data.z,
+        });
+        if (data.yaw && data.pitch)
+          this.emit('client_face', parseDirection(data));
+      }
+    });
+
+    proxyHandler.on('fromClient', (data, meta) => {
+      if (meta.name === 'position' || meta.name === 'position_look') {
+        this.emit('client_move', {
+          x: data.x,
+          y: data.y,
+          z: data.z,
+        });
+        if (data.yaw && data.pitch)
+          this.emit('client_face', parseDirection(data));
+      }
+      if (meta.name === 'look') {
+        this.emit('client_face', parseDirection(data));
       }
     });
   }

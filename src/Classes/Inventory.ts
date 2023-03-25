@@ -1,4 +1,4 @@
-import { Client, PacketMeta } from 'minecraft-protocol';
+import { Client, PacketMeta, ServerClient } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
 import Player from '../player/Player';
@@ -16,7 +16,11 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public incomingPacketHandler: (data, meta) => void;
   public outgoingPacketHandler: (data, meta, toClient, toServer) => void;
 
-  public constructor(inventoryType: InventoryType, title = 'Inventory', slotCount = 27) {
+  public constructor(
+    inventoryType: InventoryType,
+    title = 'Inventory',
+    slotCount = 27
+  ) {
     super();
     this.items = {};
     this.type = inventoryType;
@@ -51,7 +55,6 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
       inventoryType: this.type,
       windowTitle: `{"translate":"${this.title}"}`,
       slotCount: this.slotCount,
-      entityId: undefined,
     });
 
     const items = [];
@@ -84,7 +87,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
     });
   }
 
-  public setSlot(client: Client, item: Item, slot: number): void {
+  public setSlot(client: ServerClient, item: Item, slot: number): void {
     client.write('set_slot', {
       windowId: 50,
       slot,
@@ -105,7 +108,12 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
       if (meta.name === 'open_window') this.markAsClosed(proxyHandler);
     };
 
-    this.outgoingPacketHandler = (data, meta: PacketMeta, toClient: Client, toServer: Client) => {
+    this.outgoingPacketHandler = (
+      data,
+      meta: PacketMeta,
+      toClient: Client,
+      toServer: Client
+    ) => {
       if (meta.name === 'close_window')
         if (data.windowId === 50 && this.opened) {
           this.markAsClosed(proxyHandler);
@@ -113,14 +121,19 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
         }
 
       if (meta.name === 'window_click') {
-        if (data.windowId === 50 && this.opened && data.slot < this.slotCount && data.slot !== -999) {
+        if (
+          data.windowId === 50 &&
+          this.opened &&
+          data.slot < this.slotCount &&
+          data.slot !== -999
+        ) {
           this.emit('click', {
             button: data.mouseButton,
             mode: data.mode,
             slot: data.slot,
             toServer: toServer,
             raw: data,
-            cancel: (client: Client) => {
+            cancel: (client: ServerClient) => {
               client.write('set_slot', {
                 windowId: -1,
                 slot: -1,

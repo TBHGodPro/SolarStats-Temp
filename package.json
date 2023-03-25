@@ -11,7 +11,7 @@
     "build": "npm run clean && node ./scripts/build.js",
     "start": "node .",
     "dev": "nodemon -x \"npm run build -- --noDashboard && npm start\" -e ts",
-    "postinstall": "cd dashboard && npm install"
+    "postinstall": "patch-package; cd dashboard && npm install"
   },
   "repository": {
     "type": "git",
@@ -52,6 +52,7 @@
     "@types/uuid": "^8.3.4",
     "@types/ws": "^8.5.4",
     "javascript-obfuscator": "^4.0.0",
+    "patch-package": "^6.5.1",
     "pkg": "^5.5.2",
     "typed-emitter": "^1.4.0",
     "typescript": "^4.5.4",

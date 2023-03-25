@@ -6,8 +6,8 @@ import * as https from 'node:https';
 import { join } from 'node:path';
 import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
-import BossBar from './Classes/BossBar';
 import Logger from './Classes/Logger';
+import BossBar from './Classes/PlayerControllers/BossBar';
 import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
 import { Config, reloadEmotes } from './Types';
@@ -16,10 +16,23 @@ import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
 import update from './utils/updater';
 
-export const isPacked: boolean = Object.prototype.hasOwnProperty.call(process, 'pkg');
-export const version = JSON.parse(readFileSync(isPacked ? join(__dirname, '..', 'package.json') : 'package.json', 'utf8')).version;
+export const isPacked: boolean = Object.prototype.hasOwnProperty.call(
+  process,
+  'pkg'
+);
+export const version = JSON.parse(
+  readFileSync(
+    isPacked ? join(__dirname, '..', 'package.json') : 'package.json',
+    'utf8'
+  )
+).version;
 export let config = getConfig();
-if (!/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(config.apiKey)) throw 'Please put in a valid Hypixel API Key into the config.json file';
+if (
+  !/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(
+    config.apiKey
+  )
+)
+  throw 'Please put in a valid Hypixel API Key into the config.json file';
 export const hypixelClient = createClient(config.apiKey);
 export const dashboard = initDashboard();
 
@@ -48,10 +61,15 @@ let versionString = '';
 for (let i = 0; i < 52 - version.length; i++) versionString += ' ';
 console.log(`${versionString}v${version}\n`);
 
-if (process.platform === 'win32' && config.checkForUpdates && !process.argv.includes('--skipUpdater')) update();
+if (
+  process.platform === 'win32' &&
+  config.checkForUpdates &&
+  !process.argv.includes('--skipUpdater')
+)
+  update();
 
 const proxy = new InstantConnectProxy({
-  loginHandler: client => ({
+  loginHandler: (client) => ({
     auth: 'microsoft',
     username: client.username,
   }),
@@ -95,7 +113,7 @@ player.proxyHandler.on('start', (client, server) => {
   }
 });
 
-player.proxyHandler.on('end', username => {
+player.proxyHandler.on('end', (username) => {
   Logger.info(`${chalk.italic.bold(username)} disconnected from the proxy`);
   player.disconnect();
 });
@@ -115,7 +133,9 @@ if (config.statistics && !process.argv.includes('--noTracking'))
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
       }
     )
-    .catch(error => Logger.error('An error occurred while sending statistics', error));
+    .catch((error) =>
+      Logger.error('An error occurred while sending statistics', error)
+    );
 
 export const bossBar = new BossBar('§cSolar§fStats', 300);
 bossBar.render();
@@ -126,3 +146,5 @@ export function updateMainBossBar() {
   if (bossBar.text != name) bossBar.setText(name);
 }
 setInterval(() => updateMainBossBar(), 500);
+
+import './Classes/PlayerControllers/SideBar';

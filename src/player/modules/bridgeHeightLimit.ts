@@ -25,7 +25,7 @@ player.proxyHandler.on('fromClient', (packet, meta, toClient) => {
   if (
     meta.name !== 'block_place' ||
     !playerModule.enabled ||
-    !player.status?.mode?.includes?.('DUELS_BRIDGE_') ||
+    !player.isInGameMode("DUELS_BRIDGE") ||
     packet.heldItem.blockId !== 159 ||
     !(
       (packet.direction === 1 && packet.location.y >= 99) ||

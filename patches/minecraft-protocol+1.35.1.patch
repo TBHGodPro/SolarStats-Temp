@@ -1,0 +1,35 @@
+diff --git a/node_modules/minecraft-protocol/src/index.d.ts b/node_modules/minecraft-protocol/src/index.d.ts
+index ac76a1d..4642ed8 100644
+--- a/node_modules/minecraft-protocol/src/index.d.ts
++++ b/node_modules/minecraft-protocol/src/index.d.ts
+@@ -5,6 +5,7 @@ import { Socket } from 'net'
+ import * as Stream from 'stream'
+ import { Agent } from 'http'
+ import { Transform } from "readable-stream";
++import { PacketsPlayToClient, PacketsPlayToServer } from '../../../src/PacketTypings';
+ 
+ type PromiseLike = Promise<void> | void
+ 
+@@ -24,7 +25,10 @@ declare module 'minecraft-protocol' {
+ 		customPackets: any
+ 		protocolVersion: number
+ 		version: string
+-		write(name: string, params: any): void
++		write<T extends keyof PacketsPlayToServer>(
++		  name: T,
++		  params: PacketsPlayToServer[T]
++		): void;
+ 		writeRaw(buffer: any): void
+ 		compressionThreshold: string
+ 		ended: boolean
+@@ -151,6 +155,10 @@ declare module 'minecraft-protocol' {
+ 
+ 	export interface ServerClient extends Client {
+ 		id: number
++		write<T extends keyof PacketsPlayToClient>(
++		  name: T,
++		  params: PacketsPlayToClient[T]
++		): void;
+ 	}
+ 
+ 	export interface ServerOptions {
