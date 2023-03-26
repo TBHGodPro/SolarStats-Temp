@@ -161,7 +161,6 @@ export interface IPlayer {
   uuid: string;
   entityId?: number;
   location?: Location;
-  velocity?: Location;
 }
 
 export const baseEmotes = {
@@ -219,3 +218,5 @@ export interface Direction {
   yaw: number;
   pitch: number;
 }
+
+export type ValueOf<T> = T[keyof T];

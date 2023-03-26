@@ -1,38 +1,32 @@
-import {
-  Client as PlayerClient,
-  PacketMeta,
-  ServerClient,
-} from 'minecraft-protocol';
+import { Client as PlayerClient, ServerClient } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import * as structuredClone from 'structured-clone';
 import TypedEmitter from 'typed-emitter';
 import { PacketsPlayToClient, PacketsPlayToServer } from '../PacketTypings';
+import { ValueOf } from '../Types';
 import Player from './Player';
-
-type PacketTypeFromServer = {
-  [T in keyof PacketsPlayToClient]: {
-    name: T;
-    data: PacketsPlayToClient[T];
-  };
-};
-type PacketTypeFromClient = {
-  [T in keyof PacketsPlayToServer]: {
-    name: T;
-    data: PacketsPlayToServer[T];
-  };
-};
 
 export type PlayerProxyHandlerEvents = {
   start: (toClient: ServerClient, toServer: PlayerClient) => void;
   end: (username: string) => void;
 
   fromServer: (
-    data: PacketTypeFromServer[keyof PacketTypeFromServer],
+    packet: ValueOf<{
+      [T in keyof PacketsPlayToClient]: {
+        name: T;
+        data: PacketsPlayToClient[T];
+      };
+    }>,
     toClient: ServerClient,
     toServer: PlayerClient
   ) => void | Promise<void> | boolean;
   fromClient: (
-    data: PacketTypeFromClient[keyof PacketTypeFromClient],
+    packet: ValueOf<{
+      [T in keyof PacketsPlayToServer]: {
+        name: T;
+        data: PacketsPlayToServer[T];
+      };
+    }>,
     toClient: ServerClient,
     toServer: PlayerClient
   ) => void | Promise<void> | boolean;

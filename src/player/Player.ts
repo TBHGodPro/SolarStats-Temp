@@ -110,34 +110,6 @@ export default class Player {
       });
       this.modules = modules;
     })();
-  }
-
-  public connect(client: ServerClient, server: Client): void {
-    this.client = client;
-    this.online = true;
-    this.server = server;
-    this.teams = [];
-    this.connectedPlayers = [];
-    this.uuid = client.uuid;
-
-    this.lcPlayer = new LunarClientPlayer({
-      playerUUID: this.uuid,
-      customHandling: {
-        registerPluginChannel: (channel) => {
-          this.client.write('custom_payload', {
-            channel: 'REGISTER',
-            data: Buffer.from(channel + '\0'),
-          });
-        },
-        sendPacket: (buffer) => {
-          this.client.write('custom_payload', {
-            channel: this.lcPlayer.channel,
-            data: buffer,
-          });
-        },
-      },
-    });
-    this.lcPlayer.connect();
 
     this.listener.on('switch_server', async () => {
       this.teams = [];
@@ -181,12 +153,6 @@ export default class Player {
         p.location.z += difference.z;
       }
     });
-    this.listener.on('entity_velocity', (entityId, velocity) => {
-      const p = this.connectedPlayers.find((v) => v.entityId === entityId);
-      if (p) {
-        // p.velocity = velocity;
-      }
-    });
 
     this.listener.on('player_leave', (entityId) => {
       const p = this.connectedPlayers.findIndex((v) => v.entityId === entityId);
@@ -199,6 +165,51 @@ export default class Player {
       (direction) => (this.direction = direction)
     );
 
+    this.listener.on('team_create', (name) => {
+      if (!this.teams.find((team) => team.name === name))
+        this.teams.push({
+          name,
+          players: [],
+        });
+    });
+    this.listener.on('team_delete', (name) => {
+      const team = this.teams.find((team) => team.name === name);
+      if (team) this.teams.splice(this.teams.indexOf(team), 1);
+    });
+    this.listener.on('team_player_add', (name, players) => {
+      const team = this.teams.find((team) => team.name === name);
+      if (team) team.players.push(...players);
+      else this.teams.push({ name, players });
+    });
+  }
+
+  public connect(client: ServerClient, server: Client): void {
+    this.client = client;
+    this.online = true;
+    this.server = server;
+    this.teams = [];
+    this.connectedPlayers = [];
+    this.uuid = client.uuid;
+
+    this.lcPlayer = new LunarClientPlayer({
+      playerUUID: this.uuid,
+      customHandling: {
+        registerPluginChannel: (channel) => {
+          this.client.write('custom_payload', {
+            channel: 'REGISTER',
+            data: Buffer.from(channel + '\0'),
+          });
+        },
+        sendPacket: (buffer) => {
+          this.client.write('custom_payload', {
+            channel: this.lcPlayer.channel,
+            data: buffer,
+          });
+        },
+      },
+    });
+    this.lcPlayer.connect();
+
     this.refreshPlayerLocation();
     // In case the user reconnects to the server and is directly in a game
     setTimeout(async () => {
@@ -206,16 +217,6 @@ export default class Player {
     }, 1500);
 
     updateDashboardPlayer();
-
-    setInterval(() => {
-      for (const p of this.connectedPlayers) {
-        if (!p.location || !p.velocity) continue;
-        p.location.x += p.velocity.x;
-        p.location.y += p.velocity.y;
-        p.location.z += p.velocity.z;
-        p.velocity = null;
-      }
-    }, 50);
   }
 
   public disconnect(): void {

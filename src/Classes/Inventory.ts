@@ -1,4 +1,4 @@
-import { Client, PacketMeta, ServerClient } from 'minecraft-protocol';
+import { Client, ServerClient } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
 import Player from '../player/Player';

@@ -1,4 +1,3 @@
-import { PacketMeta } from 'minecraft-protocol';
 import { writeFile } from 'node:fs/promises';
 import Command from '../Classes/Command';
 
