@@ -114,8 +114,8 @@ export default class Player {
     this.listener.on('switch_server', async () => {
       this.teams = [];
       this.connectedPlayers = [];
-      this.lcPlayer.removeAllWaypoints();
-      this.lcPlayer.removeAllTeammates();
+      this.lcPlayer?.removeAllWaypoints();
+      this.lcPlayer?.removeAllTeammates();
       await this.refreshPlayerLocation();
     });
 

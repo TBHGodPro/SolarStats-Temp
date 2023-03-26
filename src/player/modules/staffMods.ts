@@ -42,8 +42,10 @@ function disableStaffMods() {
   player.lcPlayer?.setStaffModState(StaffMod.BUNNY_HOP, false);
 }
 
-if (playerModule.enabled) enableStaffMods();
-else disableStaffMods();
+player.listener.on('switch_server', () => {
+  if (playerModule.enabled) enableStaffMods();
+  else disableStaffMods();
+});
 
 playerModule.onConfigChange = (enabled) => {
   if (enabled) enableStaffMods();
