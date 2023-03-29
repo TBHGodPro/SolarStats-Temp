@@ -1,7 +1,7 @@
 # Solar Stats 📊
 
-![GitHub](https://img.shields.io/github/license/Solar-Tweaks/SolarStats?style=for-the-badge)
-![Maintenance](https://img.shields.io/maintenance/yes/2022?style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/TBHGodPro/SolarStats-Temp?style=for-the-badge)
+![Maintenance](https://img.shields.io/maintenance/yes/2023?style=for-the-badge)
 
 Minecraft proxy server for Hypixel. It's like a stats overlay, but better. For now you must build it yourself and enjoy it before a release. And as a lot of our projects, this one is also open source!
 
