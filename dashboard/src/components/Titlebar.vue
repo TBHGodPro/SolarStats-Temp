@@ -117,7 +117,7 @@ export default {
       name: '',
       description: '',
     },
-    tabs: ['Home', 'Modules'],
+    tabs: ['Home', 'Modules', 'Plugins'],
   }),
   methods: {
     minimizeWindow() {

@@ -25,7 +25,7 @@ export default {
 <style scoped>
 #notification {
   width: 400px;
-  z-index: 100;
+  z-index: 1000000000000000;
   position: fixed;
   bottom: 20px;
   border-radius: 20px;

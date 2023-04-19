@@ -3,7 +3,10 @@
     <div id="home-grid">
       <div
         class="box"
-        v-for="m in $store.state.data.modules"
+        v-for="m in [
+          ...$store.state.data.modules,
+          ...$store.state.data.crashedModules,
+        ]"
         v-bind:key="m.name"
       >
         <h2>{{ m.name }}</h2>
@@ -12,68 +15,31 @@
           <i>Created by Plugin {{ m.createdBy.name }}</i>
         </h5>
         <button
+          v-if="$store.state.data.crashedModules.includes(m)"
+          class="module-toggle-btn module-toggle-btn-crashed"
+        >
+          CRASHED
+        </button>
+        <button
           class="module-toggle-btn"
           @click="toggleModule(m.name)"
           v-bind:class="{
             'module-toggle-btn-disabled': !m.enabled,
             'module-toggle-btn-enabled': m.enabled,
           }"
+          v-else
         >
           {{ m.enabled ? 'ENABLED' : 'DISABLED' }}
         </button>
       </div>
     </div>
-    <div
-      ref="tooltip"
-      v-show="tooltip.show"
-      :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }"
-      class="tooltip"
-    >
-      <h3 v-html="tooltip.value"></h3>
-    </div>
   </div>
 </template>
 
 <script>
-import { clipboard } from '@electron/remote';
-
 export default {
-  name: 'Home',
-  data: () => ({
-    tooltip: {
-      show: false,
-      x: 0,
-      y: 0,
-      value: '',
-    },
-  }),
+  name: 'Modules',
   methods: {
-    secondsToHms(d) {
-      const h = Math.floor(d / 3600);
-      const m = Math.floor((d % 3600) / 60);
-      const s = Math.floor((d % 3600) % 60);
-
-      const hDisplay = h > 0 ? h + (h == 1 ? ' h ' : ' hrs ') : '';
-      const mDisplay = m > 0 ? m + (m == 1 ? ' m ' : ' mins ') : '';
-      const sDisplay = s > 0 ? s + (s == 1 ? ' s' : ' s') : '';
-      return hDisplay + mDisplay + sDisplay;
-    },
-    copyToClipboard(data) {
-      clipboard.writeText(data, 'clipboard');
-    },
-
-    showTooltip(value) {
-      this.tooltip.value = value;
-      this.tooltip.show = true;
-    },
-    moveTooltip(event) {
-      this.tooltip.x = event.clientX + 20;
-      this.tooltip.y = event.clientY - 40;
-    },
-    hideTooltip() {
-      this.tooltip.show = false;
-    },
-
     toggleModule(name) {
       this.$store.state.data.modules.find((i) => i.name == name).enabled =
         !this.$store.state.data.modules.find((i) => i.name == name).enabled;
@@ -152,5 +118,13 @@ export default {
 }
 .module-toggle-btn-enabled:hover {
   background-color: var(--color-green-hover);
+}
+.module-toggle-btn-crashed {
+  background-color: var(--color-red);
+  border: none;
+  transition: background-color 0.3s;
+}
+.module-toggle-btn:hover {
+  cursor: default;
 }
 </style>

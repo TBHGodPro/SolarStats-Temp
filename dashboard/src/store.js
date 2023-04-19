@@ -11,6 +11,7 @@ const store = createStore({
       data: null,
     },
     failedPackets: [],
+    showingAddPluginPage: false,
   },
   getters: {
     isConnected(state) {
@@ -47,9 +48,9 @@ export async function showNotification(title, message, type, duration = 2500) {
       type,
     },
   };
-  setTimeout(() => (store.state.notification.showing = false), duration);
+  await new Promise((res) => setTimeout(res, duration));
+  store.state.notification.showing = false;
+  store.state.notification.data = null;
 }
-
-window.e = showNotification;
 
 export default store;

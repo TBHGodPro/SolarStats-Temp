@@ -1,6 +1,6 @@
 import {
   LunarClientPlayer,
-  NotificationLevel
+  NotificationLevel,
 } from '@minecraft-js/lunarbukkitapi';
 import { Status } from 'hypixel-api-reborn';
 import { Client, ServerClient } from 'minecraft-protocol';
@@ -60,6 +60,7 @@ export default class Player {
 
   public constructor(proxy: InstantConnectProxy) {
     this.crashedModules = [];
+    this.modules = [];
     this.plugins = [];
     this.proxy = proxy;
 
@@ -292,11 +293,11 @@ export default class Player {
   }
 
   private onModuleCrash(module: PlayerModule, error): void {
+    Logger.error(`Error while executing module ${module.name}!`, error);
     this.sendMessage(
       `§cError while executing module ${module.name}!\n§cDisabling module...`
     );
     this.modules.splice(this.modules.indexOf(module), 1);
-    Logger.error(`Error while executing module ${module.name}!`, error);
     this.crashedModules.push(module);
 
     updateMeta();
