@@ -5,6 +5,6 @@
     "outDir": "./build",
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "plugins/freeCam.js"],
   "exclude": ["node_modules"]
 }

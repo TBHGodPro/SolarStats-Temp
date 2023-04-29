@@ -3,7 +3,7 @@
     <div id="add-plugin-page-border">
       <div id="add-plugin-page-content">
         <h2 @click="showAddPluginsMenu()">
-          Click Here to Add Plugins<br /><br />Or Drag-and-Drop the files here.
+          Click Here to add Plugins<br /><br />Or Drag-and-Drop the files here
         </h2>
       </div>
     </div>
@@ -81,7 +81,9 @@ export default {
       this.$store.state.showingAddPluginPage = false;
       await showNotification(
         'Success!',
-        `Successfully Added ${successes} Plugin${successes === 1 ? '' : 's'}!<br/><br/>Restart SolarStats to load them.`,
+        `Successfully Added ${successes} Plugin${
+          successes === 1 ? '' : 's'
+        }!<br/><br/>Restart SolarStats to load them.`,
         'success',
         3500
       );

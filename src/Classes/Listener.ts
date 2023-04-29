@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
-import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import { Direction, ListenerEvents, Location } from '../Types';
+import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import Logger from './Logger';
 
 export function parseLocation(data: Location) {
@@ -148,7 +148,10 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
           z: data.z,
         });
         if (data.yaw && data.pitch)
-          this.emit('client_face', parseDirection(data));
+          this.emit('client_face', parseDirection(data), {
+            yaw: data.yaw,
+            pitch: data.pitch,
+          });
       }
     });
 
@@ -161,7 +164,10 @@ export default class Listener extends (EventEmitter as new () => TypedEmitter<Li
         });
       }
       if (name === 'look' || name === 'position_look') {
-        this.emit('client_face', parseDirection(data));
+        this.emit('client_face', parseDirection(data), {
+          yaw: data.yaw,
+          pitch: data.pitch,
+        });
       }
     });
   }

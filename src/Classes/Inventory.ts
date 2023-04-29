@@ -1,9 +1,9 @@
 import { Client, ServerClient } from 'minecraft-protocol';
 import { EventEmitter } from 'node:events';
 import TypedEmitter from 'typed-emitter';
+import { InventoryEvents, InventoryType } from '../Types';
 import Player from '../player/Player';
 import PlayerProxyHandler from '../player/PlayerProxyHandler';
-import { InventoryEvents, InventoryType } from '../Types';
 import Item from './Item';
 
 export default class Inventory extends (EventEmitter as new () => TypedEmitter<InventoryEvents>) {

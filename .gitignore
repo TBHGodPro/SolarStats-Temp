@@ -13,7 +13,7 @@ packetDump.json
 
 plugins/*
 
-!plugins/parkourTimer.js
+!plugins/freeCam.js
 
 # Temp/Testing
 

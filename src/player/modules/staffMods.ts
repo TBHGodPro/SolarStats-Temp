@@ -43,8 +43,10 @@ function disableStaffMods() {
 }
 
 player.listener.on('switch_server', () => {
-  if (playerModule.enabled) enableStaffMods();
-  else disableStaffMods();
+  setTimeout(() => {
+    if (playerModule.enabled) enableStaffMods();
+    else disableStaffMods();
+  }, 1000);
 });
 
 playerModule.onConfigChange = (enabled) => {

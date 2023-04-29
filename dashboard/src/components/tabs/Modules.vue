@@ -12,7 +12,12 @@
         <h2>{{ m.name }}</h2>
         <h4>{{ m.description }}</h4>
         <h5 v-if="m.createdBy">
-          <i>Created by Plugin {{ m.createdBy.name }}</i>
+          <i
+            >Created by Plugin
+            <span @click="setActiveTab('Plugins')">{{
+              m.createdBy.name
+            }}</span></i
+          >
         </h5>
         <button
           v-if="$store.state.data.crashedModules.includes(m)"
@@ -52,6 +57,9 @@ export default {
         },
       });
     },
+    setActiveTab(tab) {
+      this.$store.state.activeTab = tab;
+    },
   },
 };
 </script>
@@ -86,7 +94,16 @@ export default {
   padding: 0px 2.5%;
 }
 .box > h4 {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
+}
+.box > h5 > i > span {
+  text-decoration: underline;
+  color: aqua;
+  transition: filter 0.2s ease-in-out;
+}
+.box > h5 > i > span:hover {
+  cursor: pointer;
+  filter: brightness(1.2);
 }
 
 .module-toggle-btn {

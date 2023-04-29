@@ -72,7 +72,7 @@ export interface ListenerEvents {
   ) => void;
   action_bar: (message: object) => void;
   client_move: (location: Location) => void;
-  client_face: (direction: Direction) => void;
+  client_face: (direction: Direction, raw: Direction) => void;
 }
 
 export interface BlockPlacePacket {

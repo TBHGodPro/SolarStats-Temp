@@ -23,13 +23,13 @@ export type OptionalNBT = {
     };
   };
 };
-export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+export type UUID = string;
 
 // Objects
 
 export type Slot = {
   blockId: number;
-  itemCount: number;
+  itemCount?: number;
   itemDamage?: number;
   nbtData?: OptionalNBT;
 };
@@ -407,10 +407,7 @@ export type PacketsPlayToClient = {
   };
   window_items: {
     windowId: number;
-    items: {
-      countType: number;
-      type: Slot;
-    }[];
+    items: Slot[];
   };
   craft_progress_bar: {
     windowId: number;

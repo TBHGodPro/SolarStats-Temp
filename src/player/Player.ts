@@ -12,8 +12,8 @@ import Command from '../Classes/Command';
 import CommandHandler from '../Classes/CommandHandler';
 import Listener from '../Classes/Listener';
 import Logger from '../Classes/Logger';
-import { updateDashboardPlayer, updateMeta } from '../dashboard';
 import { Direction, IPlayer, Location, Team } from '../Types';
+import { updateDashboardPlayer, updateMeta } from '../dashboard';
 import { fetchPlayerLocation } from '../utils/hypixel';
 import loadPlugins, { PluginInfo } from '../utils/plugins';
 import PlayerModule from './PlayerModule';
@@ -39,13 +39,19 @@ export default class Player {
   public uuid?: string;
   public location?: Location;
   public direction?: Direction;
+  public rawDirection?: Direction;
 
   public get statusMessage(): string {
     return this.status?.online && this.status?.mode && this.status.game?.name
       ? `${
           this.status.mode.includes(this.status.game.name.toUpperCase())
             ? ''
-            : `${this.status.game.name} `
+            : `${
+                // @ts-ignore
+                this.status.game.name === 'Not Found'
+                  ? 'Main'
+                  : this.status.game.name
+              } `
         }${
           this.status.mode
             ? `${this.status.mode
@@ -109,7 +115,7 @@ export default class Player {
           Logger.error(`Couldn't load module ${file}`, error);
         }
       });
-      this.modules = modules;
+      this.modules.splice(0, 0, ...modules);
     })();
 
     this.listener.on('switch_server', async () => {
@@ -161,10 +167,10 @@ export default class Player {
     });
 
     this.listener.on('client_move', (location) => (this.location = location));
-    this.listener.on(
-      'client_face',
-      (direction) => (this.direction = direction)
-    );
+    this.listener.on('client_face', (direction, raw) => {
+      this.direction = direction;
+      this.rawDirection = raw;
+    });
 
     this.listener.on('team_create', (name) => {
       if (!this.teams.find((team) => team.name === name))

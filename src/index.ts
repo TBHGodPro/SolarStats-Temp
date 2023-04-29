@@ -8,9 +8,9 @@ import { InstantConnectProxy } from 'prismarine-proxy';
 import { NIL } from 'uuid';
 import Logger from './Classes/Logger';
 import BossBar from './Classes/PlayerControllers/BossBar';
+import { Config, reloadEmotes } from './Types';
 import initDashboard, { updateConfig } from './dashboard';
 import Player from './player/Player';
-import { Config, reloadEmotes } from './Types';
 import { filePath, getConfig } from './utils/config';
 import { createClient } from './utils/hypixel';
 import setupTray from './utils/systray';
@@ -147,4 +147,4 @@ export function updateMainBossBar() {
 }
 setInterval(() => updateMainBossBar(), 500);
 
-import './Classes/PlayerControllers/SideBar';
+// import './Classes/PlayerControllers/SideBar';
