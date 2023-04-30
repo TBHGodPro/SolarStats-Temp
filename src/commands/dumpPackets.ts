@@ -47,7 +47,7 @@ command.onTriggered = (chatCommand, args) => {
 
   command.player.proxyHandler.on('fromServer', callback('server'));
   command.player.proxyHandler.on('fromClient', callback('client'));
-  command.player.lcPlayer.sendNotification(
+  command.player.lcPlayer?.sendNotification(
     `Dumping packets for ${timeout}ms...`,
     2000
   );
@@ -63,7 +63,7 @@ command.onTriggered = (chatCommand, args) => {
     );
     await writeFile('packetDump.json', JSON.stringify(packets, null, 2));
 
-    command.player.lcPlayer.sendNotification(
+    command.player.lcPlayer?.sendNotification(
       `Dumped ${packets.length} packets to packetDump.json`,
       2000
     );

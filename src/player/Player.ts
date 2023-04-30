@@ -18,6 +18,7 @@ import { fetchPlayerLocation } from '../utils/hypixel';
 import loadPlugins, { PluginInfo } from '../utils/plugins';
 import PlayerModule from './PlayerModule';
 import PlayerProxyHandler from './PlayerProxyHandler';
+import { parseUUID } from '@minecraft-js/uuid';
 
 export default class Player {
   public readonly crashedModules: PlayerModule[];
@@ -199,7 +200,7 @@ export default class Player {
     this.uuid = client.uuid;
 
     this.lcPlayer = new LunarClientPlayer({
-      playerUUID: this.uuid,
+      playerUUID: parseUUID(this.uuid),
       customHandling: {
         registerPluginChannel: (channel) => {
           this.client.write('custom_payload', {
@@ -215,7 +216,7 @@ export default class Player {
         },
       },
     });
-    this.lcPlayer.connect();
+    this.lcPlayer?.connect();
 
     this.refreshPlayerLocation();
     // In case the user reconnects to the server and is directly in a game
@@ -259,7 +260,7 @@ export default class Player {
     if (!this.status) return;
     if (!this.status.mode) return;
     if (this.status.mode === 'LOBBY') return;
-    this.lcPlayer.sendNotification(
+    this.lcPlayer?.sendNotification(
       'Dodging game...',
       2500,
       NotificationLevel.INFO

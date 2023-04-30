@@ -51,7 +51,7 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
         const result = func(
           {
             data,
-            name: meta.name,
+            name: meta.name as any,
           },
           toClient,
           toServer
@@ -77,7 +77,7 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
         const result = func(
           {
             data,
-            name: meta.name,
+            name: meta.name as any,
           },
           toClient,
           toServer

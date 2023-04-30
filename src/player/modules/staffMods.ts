@@ -19,23 +19,25 @@ const playerModule = new PlayerModule(
   'staffMods'
 );
 
-function enableStaffMods() {
-  player.lcPlayer?.sendNotification(
-    'Enabled Staff Mods',
-    1500,
-    NotificationLevel.INFO
-  );
+function enableStaffMods(notify = true) {
+  if (notify)
+    player.lcPlayer?.sendNotification(
+      'Enabled Staff Mods',
+      1500,
+      NotificationLevel.INFO
+    );
 
   player.lcPlayer?.setStaffModState(StaffMod.XRAY, true);
   player.lcPlayer?.setStaffModState(StaffMod.NAME_TAGS, true);
   player.lcPlayer?.setStaffModState(StaffMod.BUNNY_HOP, true);
 }
-function disableStaffMods() {
-  player.lcPlayer?.sendNotification(
-    'Disabled Staff Mods',
-    1500,
-    NotificationLevel.INFO
-  );
+function disableStaffMods(notify = true) {
+  if (notify)
+    player.lcPlayer?.sendNotification(
+      'Disabled Staff Mods',
+      1500,
+      NotificationLevel.INFO
+    );
 
   player.lcPlayer?.setStaffModState(StaffMod.XRAY, false);
   player.lcPlayer?.setStaffModState(StaffMod.NAME_TAGS, false);
@@ -44,14 +46,14 @@ function disableStaffMods() {
 
 player.listener.on('switch_server', () => {
   setTimeout(() => {
-    if (playerModule.enabled) enableStaffMods();
-    else disableStaffMods();
-  }, 1000);
+    if (playerModule.enabled) enableStaffMods(false);
+    else disableStaffMods(false);
+  }, 2000);
 });
 
 playerModule.onConfigChange = (enabled) => {
-  if (enabled) enableStaffMods();
-  else disableStaffMods();
+  if (enabled) enableStaffMods(true);
+  else disableStaffMods(true);
 };
 
 export default playerModule;

@@ -1,16 +1,16 @@
 diff --git a/node_modules/minecraft-protocol/src/index.d.ts b/node_modules/minecraft-protocol/src/index.d.ts
-index ac76a1d..4642ed8 100644
+index c7607bc..b16fa55 100644
 --- a/node_modules/minecraft-protocol/src/index.d.ts
 +++ b/node_modules/minecraft-protocol/src/index.d.ts
-@@ -5,6 +5,7 @@ import { Socket } from 'net'
- import * as Stream from 'stream'
- import { Agent } from 'http'
+@@ -7,6 +7,7 @@ import { Agent } from 'http'
  import { Transform } from "readable-stream";
+ import { KeyObject } from 'crypto';
+ import { Realm } from "prismarine-realms"
 +import { PacketsPlayToClient, PacketsPlayToServer } from '../../../src/PacketTypings';
  
  type PromiseLike = Promise<void> | void
  
-@@ -24,7 +25,10 @@ declare module 'minecraft-protocol' {
+@@ -26,7 +27,10 @@ declare module 'minecraft-protocol' {
  		customPackets: any
  		protocolVersion: number
  		version: string
@@ -22,7 +22,7 @@ index ac76a1d..4642ed8 100644
  		writeRaw(buffer: any): void
  		compressionThreshold: string
  		ended: boolean
-@@ -151,6 +155,10 @@ declare module 'minecraft-protocol' {
+@@ -161,10 +165,14 @@ declare module 'minecraft-protocol' {
  
  	export interface ServerClient extends Client {
  		id: number
@@ -30,6 +30,11 @@ index ac76a1d..4642ed8 100644
 +		  name: T,
 +		  params: PacketsPlayToClient[T]
 +		): void;
+ 		// You must call this function when the server receives a message from a player and that message gets
+ 		// broadcast to other players in player_chat packets. This function stores these packets so the server 
+ 		// can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.
+-		logSentMessageFromPeer(packet: object): boolean
++		logSentMessageFromPeer(packet: object): boolean;
  	}
  
  	export interface ServerOptions {

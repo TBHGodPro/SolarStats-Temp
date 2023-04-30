@@ -50,7 +50,7 @@ export interface PlayerInfo {
   entityID: number;
 }
 
-export interface ListenerEvents {
+export type ListenerEvents = {
   switch_server: (toServer: Client) => void;
   server_full: (playerCount: number) => void;
   team_create: (name: string) => void;
@@ -73,7 +73,7 @@ export interface ListenerEvents {
   action_bar: (message: object) => void;
   client_move: (location: Location) => void;
   client_face: (direction: Direction, raw: Direction) => void;
-}
+};
 
 export interface BlockPlacePacket {
   location: {
@@ -137,10 +137,10 @@ export enum InventoryType {
   VILLAGER = 'minecraft:villager',
 }
 
-export interface InventoryEvents {
+export type InventoryEvents = {
   close: () => void;
   click: (event: WindowClickEvent) => void;
-}
+};
 
 export interface WindowClickEvent {
   slot: number;
