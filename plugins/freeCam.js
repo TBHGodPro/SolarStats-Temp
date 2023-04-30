@@ -32,9 +32,10 @@ let enabled = false;
 command.onTriggered = (cmd, args) => {
   const oldEnabled = enabled;
 
-  if (args[0] == 'true' || args[0] == 'false') enabled = JSON.parse(args[0]);
-  else if (args[0] == 'on') enabled = true;
-  else if (args[0] == 'off') enabled = false;
+  if (['true', 'on', 'enable', 'enabled'].includes(args[0]?.trim?.()))
+    enabled = true;
+  else if (['false', 'off', 'disable', 'disabled'].includes(args[0]?.trim?.()))
+    enabled = false;
   else enabled = !enabled;
 
   if (enabled == oldEnabled) return;
@@ -46,8 +47,11 @@ command.onTriggered = (cmd, args) => {
 let realPosition;
 let gamemode;
 let hotbarMessage;
+let abilities;
 
 async function enable() {
+  enabled = true;
+
   realPosition = {
     ...player.location,
     ...player.rawDirection,
@@ -61,10 +65,10 @@ async function enable() {
     yaw: player.direction.yaw,
     flags: 0,
   });
-  player.client.write('abilities', {
-    flags: 6,
-    flyingSpeed: 0.05000000074505806,
-    walkingSpeed: 0.10000000149011612,
+
+  player.client.write('game_state_change', {
+    reason: 3,
+    gameMode: 3,
   });
 
   player.client.write('player_info', {
@@ -156,19 +160,11 @@ async function enable() {
       },
     ],
   });
-
-  player.client.write('game_state_change', {
-    reason: 3,
-    gameMode: 3,
-  });
 }
 
 async function disable() {
-  player.client.write('abilities', {
-    flags: 0,
-    flyingSpeed: 0.05000000074505806,
-    walkingSpeed: 0.10000000149011612,
-  });
+  enabled = false;
+
   player.client.write('position', realPosition);
   if (hotbarMessage)
     player.client.write('chat', {
@@ -192,9 +188,18 @@ async function disable() {
     reason: 3,
     gameMode: gamemode,
   });
+
+  player.client.write(
+    'abilities',
+    abilities ?? {
+      flags: 0,
+      flyingSpeed: 0.05000000074505806,
+      walkingSpeed: 0.10000000149011612,
+    }
+  );
 }
 
-const fromServerStops = ['position', 'game_state_change'];
+const fromServerStops = ['position', 'game_state_change', 'abilities'];
 player.proxyHandler.on('fromServer', ({ name, data }) => {
   if (name === 'position') realPosition = data;
   if (name === 'game_state_change') gamemode = data.gameMode;
@@ -205,6 +210,7 @@ player.proxyHandler.on('fromServer', ({ name, data }) => {
     }, 2000);
     if (enabled) return false;
   }
+  if (name === 'abilities') abilities = data;
   if (!enabled) return true;
   if (fromServerStops.includes(name)) return false;
 });
@@ -219,15 +225,13 @@ const fromClientStops = [
   'window_click',
 ];
 player.proxyHandler.on('fromClient', ({ name, data }) => {
+  if (name === 'abilities' && !enabled) abilities = data;
   if (!enabled) return true;
   if (fromClientStops.includes(name)) return false;
 });
 
 player.listener.on('switch_server', () => {
-  if (enabled) {
-    enabled = false;
-    disable();
-  }
+  if (enabled) disable();
 });
 
 setInterval(() => {

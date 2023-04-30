@@ -11,7 +11,7 @@
     "build": "npm run clean && node ./scripts/build.js",
     "start": "node .",
     "dev": "nodemon -x \"npm test\" -e ts",
-    "postinstall": "patch-package; cd dashboard && npm install",
+    "postinstall": "patch-package && cd dashboard && npm install",
     "test": "npm run build -- --noDashboard && npm start"
   },
   "repository": {

@@ -50,7 +50,7 @@ export default class BossBar {
 
   public get location(): Location {
     return (
-      null /*this.realLocation*/ ??
+      this.realLocation ??
       (player.location && player.direction
         ? calculateBlock(player.location, player.direction)
         : {
@@ -120,7 +120,7 @@ export default class BossBar {
     this.health = health;
 
     player.listener.on('switch_server', () => {
-      // this.realLocation = null;
+      this.realLocation = null;
       this.spawnWithVerify();
     });
 
@@ -175,23 +175,23 @@ export default class BossBar {
       }
     });
 
-    setInterval(() => this.updatePosition(), 100);
+    setInterval(() => this.updatePosition(), 250);
   }
 
   private spawnWithVerify() {
     if (this.spawned) this.spawn(true);
     setTimeout(() => {
       if (this.spawned) this.spawn(true);
-    }, 250);
-    setTimeout(() => {
-      if (this.spawned) this.spawn(true);
     }, 500);
     setTimeout(() => {
       if (this.spawned) this.spawn(true);
-    }, 750);
+    }, 1000);
     setTimeout(() => {
       if (this.spawned) this.spawn(true);
-    }, 1000);
+    }, 1500);
+    setTimeout(() => {
+      if (this.spawned) this.spawn(true);
+    }, 2000);
   }
 
   public render(skipSpawnedCheck = false) {
