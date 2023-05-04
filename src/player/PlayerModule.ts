@@ -82,9 +82,10 @@ export default class PlayerModule {
 
     const config = getConfig();
 
-    if (config.settings[this.configKey])
+    if (config.settings[this.configKey]) {
       this.settings = config.settings[this.configKey];
-    else {
+      this.onSettingsChange?.(this.settings);
+    } else {
       const newConfig = { ...config.settings };
       newConfig[this.configKey] = defaultValue;
       setValueSync('settings', newConfig);

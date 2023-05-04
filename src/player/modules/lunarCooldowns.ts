@@ -13,7 +13,7 @@ settingItem.lore = [
 ];
 
 const playerModule = new PlayerModule(
-  'LunarCooldowns',
+  'Lunar Cooldowns',
   'Add support for Lunar Cooldowns',
   settingItem,
   'lunarCooldowns'

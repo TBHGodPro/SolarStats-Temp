@@ -15,7 +15,7 @@ settingItem.lore = [
 ];
 
 const playerModule = new PlayerModule(
-  'BridgePlayerDistances',
+  'Bridge Player Distances',
   "Shows you your opponent's and yourself's distances from the goals.",
   settingItem,
   'bridgePlayerDistance'

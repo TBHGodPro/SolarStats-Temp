@@ -109,6 +109,7 @@ export default {
   grid-row-gap: 25px;
   justify-content: center;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .box {

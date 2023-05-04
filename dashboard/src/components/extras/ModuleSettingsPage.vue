@@ -21,7 +21,10 @@
                   activeSettingsSchema[setting] === 'number' &&
                   isValidNumber($event.target.value)
                 )
-                  activeSettings[setting] = parseInt($event.target.value);
+                  activeSettings[setting] =
+                    $event.target.value == ''
+                      ? ''
+                      : parseInt($event.target.value);
                 else if (activeSettingsSchema[setting] === 'string')
                   activeSettings[setting] = $event.target.value;
                 else {

@@ -15,7 +15,7 @@ settingItem.lore = [
 ];
 
 const playerModule = new PlayerModule(
-  'BridgeHeightLimit',
+  'Bridge Height Limit',
   'Make block removal faster when reaching height limit in bridge',
   settingItem,
   'heightLimitDelayFix'

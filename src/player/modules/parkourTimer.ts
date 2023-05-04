@@ -13,7 +13,7 @@ settingItem.lore = [
 ];
 
 const playerModule = new PlayerModule(
-  'ParkourTimer',
+  'Parkour Timer',
   'An automatic live parkour timer',
   settingItem,
   'parkourTimer'

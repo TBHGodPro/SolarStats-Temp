@@ -45,6 +45,7 @@ export default {
   grid-row-gap: 15px;
   justify-content: center;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .box {

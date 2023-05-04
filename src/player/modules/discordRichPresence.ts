@@ -10,7 +10,7 @@ const settingItem = new Item(61);
 settingItem.displayName = '§5Discord §6Rich Presence';
 settingItem.lore = ['', '§7Enable or Disable Discord Rich Presence for SolarStats', '', `§7Current: §${config?.modules.discordRichPresence ? 'aEnabled' : 'cDisabled'}`];
 
-const playerModule = new PlayerModule('DiscordRichPresence', 'Use Discord Rich Presence for SolarStats', settingItem, 'discordRichPresence');
+const playerModule = new PlayerModule('Discord Rich Presence', 'Use Discord Rich Presence for SolarStats', settingItem, 'discordRichPresence');
 
 export const clientId = '1084125392555745360';
 export const discordClient = new Client({ transport: 'ipc' });
