@@ -139,10 +139,10 @@ export default {
   margin-top: -1%;
   margin-left: 1.25%;
   border-radius: 30px;
-  transition: filter 0.25s ease-in-out;
+  transition: filter 0.2s ease-in-out;
 }
 #add-plugin-page-content:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.1);
 }
 
 #add-plugin-page-content > h2 {

@@ -2,6 +2,7 @@ import {
   LunarClientPlayer,
   NotificationLevel,
 } from '@minecraft-js/lunarbukkitapi';
+import { parseUUID } from '@minecraft-js/uuid';
 import { Status } from 'hypixel-api-reborn';
 import { Client, ServerClient } from 'minecraft-protocol';
 import { readdirSync } from 'node:fs';
@@ -12,13 +13,19 @@ import Command from '../Classes/Command';
 import CommandHandler from '../Classes/CommandHandler';
 import Listener from '../Classes/Listener';
 import Logger from '../Classes/Logger';
-import { Direction, IPlayer, Location, Team } from '../Types';
+import {
+  Direction,
+  IPlayer,
+  Location,
+  ModuleSettings,
+  ModuleSettingsSchema,
+  Team,
+} from '../Types';
 import { updateDashboardPlayer, updateMeta } from '../dashboard';
 import { fetchPlayerLocation } from '../utils/hypixel';
 import loadPlugins, { PluginInfo } from '../utils/plugins';
 import PlayerModule from './PlayerModule';
 import PlayerProxyHandler from './PlayerProxyHandler';
-import { parseUUID } from '@minecraft-js/uuid';
 
 export default class Player {
   public readonly crashedModules: PlayerModule[];
@@ -63,6 +70,30 @@ export default class Player {
             : ''
         }${this.status.map ? ` on ${this.status.map}` : ''}`
       : 'Offline';
+  }
+  public get settings(): { [key: string]: ModuleSettings } {
+    const settings = {};
+
+    this.modules
+      .map((i) => [i.configKey, i.settings])
+      .filter((i) => typeof i[0] !== 'undefined' && typeof i[1] !== 'undefined')
+      .forEach(([key, data]) => {
+        settings[key as string] = data;
+      });
+
+    return settings;
+  }
+  public get settingsSchemas(): { [key: string]: ModuleSettingsSchema } {
+    const schemas = {};
+
+    this.modules
+      .map((i) => [i.configKey, i.settingsSchema])
+      .filter((i) => typeof i[0] !== 'undefined' && typeof i[1] !== 'undefined')
+      .forEach(([key, schema]) => {
+        schemas[key as string] = schema;
+      });
+
+    return schemas;
   }
 
   public constructor(proxy: InstantConnectProxy) {

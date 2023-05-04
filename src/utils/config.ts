@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { reloadConfig } from '..';
 import Logger from '../Classes/Logger';
-import { Config } from '../Types';
+import { Config, ModuleSettings, ModuleSettingsSchema } from '../Types';
 
 const customConfigPath = process.argv
   .find((arg) => arg.startsWith('--config='))
@@ -89,6 +89,78 @@ export function readConfigSync(): Config {
   }
 }
 
+export function isValidModuleSettingsSchema(
+  schema: ModuleSettingsSchema
+): schema is ModuleSettingsSchema {
+  if (typeof schema !== 'object') return false;
+
+  for (const property of Object.keys(schema)) {
+    switch (typeof schema[property]) {
+      case 'string':
+        if (
+          !['string', 'number', 'boolean'].includes(schema[property] as string)
+        )
+          return false;
+        break;
+
+      case 'object':
+        if (
+          !isValidModuleSettingsSchema(schema[property] as ModuleSettingsSchema)
+        )
+          return false;
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  return true;
+}
+
+export function isValidModuleSettings(
+  settings: ModuleSettings,
+  schema: ModuleSettingsSchema
+): any {
+  if (typeof settings !== 'object') return false;
+  if (!isValidModuleSettingsSchema(schema)) return false;
+
+  // Ensure no stray values
+  for (const property of Object.keys(settings)) {
+    if (typeof schema[property] === 'undefined') return false;
+  }
+
+  // We now know that all values are in the schema, so we find ones that should be there but aren't
+  // We also type check those that are there
+  for (const property of Object.keys(schema)) {
+    if (typeof settings[property] === 'undefined') return false;
+
+    switch (schema[property]) {
+      // Generic Types
+      case 'string':
+      case 'number':
+      case 'boolean': {
+        if (typeof settings[property] != schema[property]) return false;
+        break;
+      }
+
+      // Object Types
+      default: {
+        if (
+          !isValidModuleSettings(
+            settings[property] as ModuleSettings,
+            schema[property] as ModuleSettingsSchema
+          )
+        )
+          return false;
+        break;
+      }
+    }
+  }
+
+  return true;
+}
+
 // Automatically generated schema by `typescript-json-schema`
 // Use `npm run generateConfigSchema` to regenerate
 export const configSchema = {
@@ -124,6 +196,9 @@ export const configSchema = {
       additionalProperties: {
         type: 'boolean',
       },
+      type: 'object',
+    },
+    settings: {
       type: 'object',
     },
     proxyPort: {
@@ -163,11 +238,12 @@ export const defaultConfig: Config = {
   autoDownloadUpdates: true,
   statistics: true,
   modules: {
-    bedwarsWaypoints: true,
+    discordRichPresence: true,
+    staffMods: true,
+    parkourTimer: true,
     heightLimitDelayFix: true,
     lunarCooldowns: true,
-    bedwarsTeammates: true,
-    mvpppEmotes: true,
-    stats: true,
+    bridgePlayerDistance: true,
   },
+  settings: {},
 };

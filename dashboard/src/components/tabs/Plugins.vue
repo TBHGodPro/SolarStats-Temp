@@ -17,7 +17,7 @@
     <button id="add-plugin" @click="$store.state.showingAddPluginPage = true">
       +
     </button>
-    <PluginAddPage :showing="addingPlugin"></PluginAddPage>
+    <PluginAddPage></PluginAddPage>
   </div>
 </template>
 

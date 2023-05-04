@@ -12,6 +12,10 @@ const store = createStore({
     },
     failedPackets: [],
     showingAddPluginPage: false,
+    moduleSettingsMenu: {
+      open: false,
+      module: null,
+    },
   },
   getters: {
     isConnected(state) {

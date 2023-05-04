@@ -19,6 +19,7 @@ export interface Config {
   autoDownloadUpdates: boolean;
   statistics: boolean;
   modules: { [key: string]: boolean };
+  settings: { [key: string]: ModuleSettings };
 }
 
 export interface PlayerData {
@@ -220,3 +221,10 @@ export interface Direction {
 }
 
 export type ValueOf<T> = T[keyof T];
+
+export type ModuleSettings = {
+  [key: string]: string | number | boolean | ModuleSettings;
+};
+export type ModuleSettingsSchema = {
+  [key: string]: 'string' | 'number' | 'boolean' | ModuleSettingsSchema;
+};

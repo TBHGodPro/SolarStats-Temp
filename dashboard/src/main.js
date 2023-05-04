@@ -89,6 +89,8 @@ ipcRenderer.once('PORT', async (_, port) => {
           case events.UPDATE_MODULES:
             store.state.data.modules = data.modules;
             store.state.data.crashedModules = data.crashedModules;
+            store.state.data.settings = data.settings;
+            store.state.data.settingsSchemas = data.settingsSchemas;
             break;
           case events.UPDATE_PLUGINS:
             store.state.data.plugins = data;

@@ -10,7 +10,14 @@
         v-bind:key="m.name"
       >
         <h2>{{ m.name }}</h2>
-        <h4>{{ m.description }}</h4>
+        <h4
+          v-bind:class="{
+            'module-description-lower':
+              !$store.state.data.settingsSchemas[m.key],
+          }"
+        >
+          {{ m.description }}
+        </h4>
         <h5 v-if="m.createdBy">
           <i
             >Created by Plugin
@@ -36,13 +43,26 @@
         >
           {{ m.enabled ? 'ENABLED' : 'DISABLED' }}
         </button>
+        <button
+          class="module-options-btn"
+          @click="openModuleSettings(m)"
+          v-if="$store.state.data.settingsSchemas[m.key]"
+        >
+          OPTIONS
+        </button>
       </div>
     </div>
+
+    <ModuleSettingsPage
+      v-if="$store.state.moduleSettingsMenu.open"
+    ></ModuleSettingsPage>
   </div>
 </template>
 
 <script>
+import ModuleSettingsPage from '../extras/ModuleSettingsPage.vue';
 export default {
+  components: { ModuleSettingsPage },
   name: 'Modules',
   methods: {
     toggleModule(name) {
@@ -60,6 +80,16 @@ export default {
     setActiveTab(tab) {
       this.$store.state.activeTab = tab;
     },
+    openModuleSettings(module) {
+      this.$store.state.moduleSettingsMenu.open =
+        !this.$store.state.moduleSettingsMenu.open;
+
+      if (this.$store.state.moduleSettingsMenu.open) {
+        this.$store.state.moduleSettingsMenu.module = module;
+      } else {
+        this.$store.state.moduleSettingsMenu.module = null;
+      }
+    },
   },
 };
 </script>
@@ -76,7 +106,7 @@ export default {
   grid-template-columns: repeat(3, 32.5%);
   grid-template-rows: repeat(2, 250px);
   grid-column-gap: 15px;
-  grid-row-gap: 15px;
+  grid-row-gap: 25px;
   justify-content: center;
   overflow-y: scroll;
 }
@@ -84,7 +114,7 @@ export default {
 .box {
   background-color: var(--color-lightest-bg);
   width: 95%;
-  height: 200px;
+  height: 260px;
   border-radius: 20px;
   transition: background-color 0.15s;
   box-shadow: rgb(0 0 0 / 13%) 0px 1px 5px 0px;
@@ -95,6 +125,9 @@ export default {
 }
 .box > h4 {
   font-size: 0.8rem;
+}
+.module-description-lower {
+  padding-top: 25px;
 }
 .box > h5 > i > span {
   text-decoration: underline;
@@ -142,6 +175,27 @@ export default {
   transition: background-color 0.3s;
 }
 .module-toggle-btn:hover {
+  cursor: default;
+}
+
+.module-options-btn {
+  width: 100%;
+  height: 50px;
+  text-shadow: var(--text-shadow);
+  font-size: 15px;
+  letter-spacing: 5px;
+  font-weight: 600;
+  position: absolute;
+  bottom: 50px;
+  cursor: pointer;
+  margin-left: -50%;
+  background-color: var(--color-darker-gray);
+  border: none;
+  transition: filter 0.2s ease-in-out;
+  filter: brightness(1.2);
+}
+.module-options-btn:hover {
+  filter: brightness(1);
   cursor: default;
 }
 </style>

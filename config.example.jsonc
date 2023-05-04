@@ -20,5 +20,7 @@
   },
   "checkForUpdates": true, // Check for updates on startup
   "autoDownloadUpdates": true, // Automatically download updates if available
-  "statistics": true // Allow Solar Tweaks to track statistics. Statistics tracked: when you launch the proxy (They are of course anonymous)
+  "statistics": true, // Allow Solar Tweaks to track statistics. Statistics tracked: when you launch the proxy (They are of course anonymous)
+  "modules": {}, // Module Statuses
+  "settings": {} // Module Settings
 }

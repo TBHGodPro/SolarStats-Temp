@@ -10,7 +10,8 @@
     "clean": "node ./scripts/clean.js",
     "build": "npm run clean && node ./scripts/build.js",
     "start": "node .",
-    "dev": "nodemon -x \"npm test\" -e ts",
+    "dev": "nodemon --watch src --watch plugins -x \"npm test\" -e js,ts,json",
+    "watch": "nodemon --watch plugins -x \"npm start\" -e js,json",
     "postinstall": "patch-package && cd dashboard && npm install",
     "test": "npm run build -- --noDashboard && npm start"
   },
