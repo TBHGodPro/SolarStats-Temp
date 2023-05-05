@@ -97,7 +97,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public close(): void {
     if (!this.opened) return;
 
-    this.markAsClosed(player.proxyHandler);
+    this.markAsClosed();
     player.client.write('close_window', {
       windowId: this.windowId,
     });
