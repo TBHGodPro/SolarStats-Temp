@@ -76,7 +76,7 @@ export class DashboardManager {
               command = `open "${file}"`;
               break;
             case 'win32':
-              command = `start "" "${file}"`;
+              command = `start "${file}"`;
               break;
             default:
               return logger.error(

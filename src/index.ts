@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as chalk from 'chalk';
-import { ping } from 'minecraft-protocol';
+import { Client, ping } from 'minecraft-protocol';
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as https from 'node:https';
 import { join } from 'node:path';
@@ -68,11 +68,15 @@ if (
 )
   update();
 
+export let toClient: Client;
 const proxy = new InstantConnectProxy({
-  loginHandler: (client) => ({
-    auth: 'microsoft',
-    username: client.username,
-  }),
+  loginHandler: (client) => {
+    toClient = client;
+    return {
+      auth: 'microsoft',
+      username: client.username,
+    };
+  },
 
   serverOptions: {
     version: '1.8.9',
@@ -104,17 +108,22 @@ writeFileSync(filePath, JSON.stringify(config, null, 2));
 
 export const player = new Player(proxy);
 
+import './ErrorCatcher';
+
 // Triggered when the player connects
 // AND changes server (when connected to a proxy like Bungeecord) for some reason
 player.proxyHandler.on('start', (client, server) => {
   if (!player.online) {
+    toClient = client as Client;
     Logger.info(`${chalk.italic.bold(client.username)} connected to the proxy`);
     player.connect(client, server);
   }
 });
 
-player.proxyHandler.on('end', (username) => {
-  Logger.info(`${chalk.italic.bold(username)} disconnected from the proxy`);
+player.proxyHandler.on('end', (username, log) => {
+  toClient = null;
+  if (log && player.online)
+    Logger.info(`${chalk.italic.bold(username)} disconnected from the proxy`);
   player.disconnect();
 });
 

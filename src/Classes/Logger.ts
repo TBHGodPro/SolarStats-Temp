@@ -3,10 +3,16 @@ import * as chalk from 'chalk';
 export default class Logger {
   private identifier?: string;
   private isPluginLogger: boolean;
+  private bgColor: string;
 
-  constructor(identifier?: string, isPluginLogger?: boolean) {
+  constructor(
+    identifier?: string,
+    isPluginLogger?: boolean,
+    bgColor: string = 'bgBlueBright'
+  ) {
     this.identifier = identifier;
     this.isPluginLogger = isPluginLogger ?? false;
+    this.bgColor = bgColor;
   }
 
   public setIdentifier(identifier: string) {
@@ -18,7 +24,7 @@ export default class Logger {
       ? [
           this.isPluginLogger
             ? chalk.bgGreen.black(` ${this.identifier} `)
-            : chalk.bgBlueBright.black(` ${this.identifier} `),
+            : chalk[this.bgColor].black(` ${this.identifier} `),
         ]
       : [];
   }

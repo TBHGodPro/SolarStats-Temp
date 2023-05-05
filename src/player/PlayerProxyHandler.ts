@@ -8,7 +8,7 @@ import Player from './Player';
 
 export type PlayerProxyHandlerEvents = {
   start: (toClient: ServerClient, toServer: PlayerClient) => void;
-  end: (username: string) => void;
+  end: (username: string, log: boolean) => void;
 
   fromServer: (
     packet: ValueOf<{
@@ -89,6 +89,6 @@ export default class PlayerProxyHandler extends (EventEmitter as new () => Typed
     });
 
     this.player.proxy.on('start', (...args) => this.emit('start', ...args));
-    this.player.proxy.on('end', (...args) => this.emit('end', ...args));
+    this.player.proxy.on('end', (username) => this.emit('end', username, true));
   }
 }
