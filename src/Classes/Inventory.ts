@@ -5,6 +5,7 @@ import { InventoryEvents, InventoryType } from '../Types';
 import Player from '../player/Player';
 import PlayerProxyHandler from '../player/PlayerProxyHandler';
 import Item from './Item';
+import { player } from '..';
 
 export default class Inventory extends (EventEmitter as new () => TypedEmitter<InventoryEvents>) {
   public items: { [key: string]: Item };
@@ -12,6 +13,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public title: string;
   public slotCount: number;
   public opened: boolean;
+  public windowId: number;
 
   public incomingPacketHandler: (...args: any[]) => void;
   public outgoingPacketHandler: (...args: any[]) => void;
@@ -19,19 +21,27 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
   public constructor(
     inventoryType: InventoryType,
     title = 'Inventory',
-    slotCount = 27
+    slotCount = 27,
+    windowId = 50
   ) {
     super();
     this.items = {};
     this.type = inventoryType;
     this.title = title;
     this.slotCount = slotCount;
+    this.windowId = windowId;
     this.opened = false;
   }
 
   public addItem(item: Item, position?: number): void {
     const finalPosition = position || Object.keys(this.items).length;
     this.items[finalPosition.toString()] = item;
+    if (this.opened)
+      player.client.write('set_slot', {
+        windowId: this.windowId,
+        slot: finalPosition,
+        item: item.slotRepresentation,
+      });
   }
 
   public addItems(items: { item: Item; position?: number }[]): void {
@@ -42,16 +52,22 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
 
   public removeItem(position: number): void {
     delete this.items[position.toString()];
+    if (this.opened)
+      player.client.write('set_slot', {
+        windowId: this.windowId,
+        slot: position,
+        item: Item.emptyItem,
+      });
   }
 
   public clear(): void {
     this.items = {};
   }
 
-  public display(player: Player): void {
+  public display(): void {
     this.opened = true;
     player.client.write('open_window', {
-      windowId: 50,
+      windowId: this.windowId,
       inventoryType: this.type,
       windowTitle: `{"translate":"${this.title}"}`,
       slotCount: this.slotCount,
@@ -69,43 +85,49 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
     }
 
     player.client.write('window_items', {
-      windowId: 50,
+      windowId: this.windowId,
       items,
     });
 
-    this.setupPacketHandlers(player.proxyHandler);
+    this.setupPacketHandlers();
     player.proxyHandler.on('fromServer', this.incomingPacketHandler);
     player.proxyHandler.on('fromClient', this.outgoingPacketHandler);
   }
 
-  public close(player: Player): void {
+  public close(): void {
     if (!this.opened) return;
 
     this.markAsClosed(player.proxyHandler);
     player.client.write('close_window', {
-      windowId: 50,
+      windowId: this.windowId,
     });
   }
 
-  public setSlot(client: ServerClient, item: Item, slot: number): void {
-    client.write('set_slot', {
-      windowId: 50,
+  public setSlot(item: Item, slot: number): void {
+    player.client.write('set_slot', {
+      windowId: this.windowId,
       slot,
       item: item.slotRepresentation,
     });
   }
 
-  private markAsClosed(proxyHandler: PlayerProxyHandler): void {
+  private markAsClosed(): void {
     this.emit('close');
     this.opened = false;
 
-    proxyHandler.removeListener('fromServer', this.incomingPacketHandler);
-    proxyHandler.removeListener('fromClient', this.outgoingPacketHandler);
+    player.proxyHandler.removeListener(
+      'fromServer',
+      this.incomingPacketHandler
+    );
+    player.proxyHandler.removeListener(
+      'fromClient',
+      this.outgoingPacketHandler
+    );
   }
 
-  private setupPacketHandlers(proxyHandler: PlayerProxyHandler): void {
+  private setupPacketHandlers(): void {
     this.incomingPacketHandler = ({ name }) => {
-      if (name === 'open_window') this.markAsClosed(proxyHandler);
+      if (name === 'open_window') this.markAsClosed();
     };
 
     this.outgoingPacketHandler = (
@@ -115,7 +137,7 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
     ) => {
       if (name === 'close_window')
         if (data.windowId === 50 && this.opened) {
-          this.markAsClosed(proxyHandler);
+          this.markAsClosed();
           return false;
         }
 
@@ -132,13 +154,13 @@ export default class Inventory extends (EventEmitter as new () => TypedEmitter<I
             slot: data.slot,
             toServer: toServer,
             raw: data,
-            cancel: (client: ServerClient) => {
-              client.write('set_slot', {
+            cancel: () => {
+              player.client.write('set_slot', {
                 windowId: -1,
                 slot: -1,
                 item: Item.emptyItem,
               });
-              client.write('set_slot', {
+              player.client.write('set_slot', {
                 windowId: 50,
                 slot: data.slot,
                 item: data.item,

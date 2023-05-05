@@ -99,7 +99,7 @@ command.onTriggered = async (chatCommand, args) => {
     inventory.addItem(module.settingItem, slot);
 
     settingsMutator[slot] = async (event) => {
-      event.cancel(player.client);
+      event.cancel();
       const newConfig = { ...config.modules };
       newConfig[module.configKey] = !config.modules[module.configKey];
       await setValue('modules', newConfig);
@@ -112,7 +112,7 @@ command.onTriggered = async (chatCommand, args) => {
       ] = `§7Current: §${
         config.modules[module.configKey] ? 'aEnabled' : 'cDisabled'
       }`;
-      inventory.setSlot(player.client, module.settingItem, slot);
+      inventory.setSlot(module.settingItem, slot);
       module.onConfigChange(config.modules[module.configKey]);
       module.toggleEnabled(config.modules[module.configKey]);
       updateMeta();
@@ -121,14 +121,14 @@ command.onTriggered = async (chatCommand, args) => {
 
   inventory.on('click', (event) => {
     if (event.mode !== 0) {
-      event.cancel(player.client);
+      event.cancel();
       return;
     }
 
     switch (event.slot) {
       case 0:
         // Sends A Message In Chat (In Hypixel's Format) With The API Key
-        inventory.close(player);
+        inventory.close();
         player.client?.write('chat', {
           message: JSON.stringify({
             text: `\n\n    §aYour API Key is\n    §b${config.apiKey}\n\n`,
@@ -144,7 +144,7 @@ command.onTriggered = async (chatCommand, args) => {
         });
         break;
       case 36:
-        event.cancel(player.client);
+        event.cancel();
 
         if (event.button === 0) {
           player.client.end('Stopping server...');
@@ -158,10 +158,10 @@ command.onTriggered = async (chatCommand, args) => {
 
         break;
       case 40:
-        inventory.close(player);
+        inventory.close();
         break;
       case 44:
-        event.cancel(player.client);
+        event.cancel();
         break;
       default:
         // Other slot, handling here
@@ -171,7 +171,7 @@ command.onTriggered = async (chatCommand, args) => {
     }
   });
 
-  inventory.display(player);
+  inventory.display();
 };
 
 export default command;
